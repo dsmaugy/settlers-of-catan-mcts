@@ -16,8 +16,8 @@ public:
     Player current_turn;
     Hex robber_position;
 
-    static std::unordered_set <Hex> tiles;
-    static std::unordered_map <Hex, int> tile_rewards;
+    static std::unordered_set<Hex> tiles;
+    static std::unordered_map<Hex, int> tile_rewards;
  
     bool is_game_over();
     Player game_winner();
