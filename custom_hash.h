@@ -3,7 +3,6 @@
 //header file content
 
 #include <stddef.h>
-#include <vector>
 #include "hex.h"
 
 class HashHex {
@@ -13,11 +12,11 @@ class HashHex {
 
 class HashRoads {
     public:
-        size_t operator()(const std::pair<Hex, Hex>& road) const;
+        size_t operator()(const HexPath& road) const;
 };
 
 class HashBuildings {
     public:
-        size_t operator()(const std::vector<std::pair<Hex, Hex>>& building) const;
+        size_t operator()(const HexIntersection& building) const;
 };
 #endif 

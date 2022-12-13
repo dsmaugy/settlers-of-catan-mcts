@@ -15,7 +15,9 @@ size_t HashBuildings::operator()(const std::vector<std::pair<Hex, Hex>>& buildin
     size_t hash_value;
     for (std::pair<Hex, Hex> road: building) {
         hash_value += HashRoads()(road);
-        hash_value << 1;
+        hash_value <<= 1;
     }
+
+    return hash_value;
 };
 
