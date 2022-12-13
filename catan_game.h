@@ -10,24 +10,24 @@
 
 class GameState{
 
-public:
-    Player player_one;
-    Player player_two;
-    Player current_turn;
-    Hex robber_position;
+    public:
+        Player player_one;
+        Player player_two;
+        Player current_turn;
+        Hex robber_position;
 
-    static std::unordered_set<Hex> tiles;
-    static std::unordered_map<Hex, int> tile_rewards;
- 
-    bool is_game_over();
-    Player game_winner();
-    std::vector<GameState> get_all_moves();
+        static std::unordered_set<Hex> tiles;
+        static std::unordered_map<Hex, int> tile_rewards;
+    
+        bool is_game_over();
+        Player game_winner();
+        std::vector<GameState> get_all_moves();
 };
 
 class Game {
 
-public:
-    GameState game_state;
+    public:
+        GameState game_state;
 };
 
 #endif
