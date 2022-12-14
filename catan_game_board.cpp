@@ -1,7 +1,7 @@
 #include "catan_game_board.h"
 #include <stdexcept>
 #include <array>
-
+#include <algorithm>
 // #include <iostream>
 
 enum Axis {
