@@ -1,9 +1,15 @@
-#ifndef __CUSTOM_HASH_GUARD
-#define __CUSTOM_HASH_GUARD
+#ifndef __CUSTOM_HASH_GUARD__
+#define __CUSTOM_HASH_GUARD__
 //header file content
 
-#include <stddef.h>
-#include "catan_game_board.h"
+
+// forward defs
+class Hex;
+class HexPath;
+class HexIntersection;
+class Player;
+class GameState;
+
 
 class HashHex {
     public:
@@ -18,5 +24,15 @@ class HashPath {
 class HashIntersection {
     public:
         size_t operator()(const HexIntersection& building) const;
+};
+
+class HashPlayer {
+    public:
+        size_t operator()(const Player& player) const;
+};
+
+class HashGameState {
+    public:
+        size_t operator()(const GameState& state) const;
 };
 #endif 

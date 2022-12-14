@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unordered_map>
 
+#include "catan_game.h"
 #include "custom_hash.h"
 
 int main(int argc, char** argv) {
