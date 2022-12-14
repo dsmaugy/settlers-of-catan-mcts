@@ -1,5 +1,5 @@
-#ifndef __HEX_GUARD
-#define __HEX_GUARD
+#ifndef __CATAN_GAME_BOARD_H_
+#define __CATAN_GAME_BOARD_H_
 //header file content
 
 class Hex {
