@@ -4,6 +4,10 @@
 #include "catan_game.h"
 #include "custom_hash.h"
 
+#include <chrono>
+
+#define TIME_DIFF_MILLISECONDS(start, end) (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count())
+
 int main(int argc, char** argv) {
     std::cout << "hello world" << "df\n";
 
@@ -38,5 +42,14 @@ int main(int argc, char** argv) {
     std::cout << "Road One: " << road_map[road_one] << " Road Two: " << road_map[road_two] << " Road Three: " << road_map[road_three] << std::endl;
     std::cout << "Building One: " << building_map[building_one] << " Building Two: " << building_map[building_two] << std::endl;
     std::cout << "Hex Path equivalence associativity: " << (road_one_equivalent == road_one) << std::endl;
+
+
+    // std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    // std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+    // while (TIME_DIFF_MILLISECONDS(begin, end) < 100) {
+    //     std::cout << "Time Elapsed: " << TIME_DIFF_MILLISECONDS(begin, end) << std::endl;
+    //     end = std::chrono::steady_clock::now();
+    // }
     return 0;
 }

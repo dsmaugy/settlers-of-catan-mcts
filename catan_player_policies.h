@@ -10,7 +10,7 @@ typedef std::pair<int, int> mcts_node;
 
 class MCTSPolicy: public PlayerPolicy {
     public:
-        int train_time_limit;
+        int train_time_limit_sec;
         bool is_parallel;
 
         MCTSPolicy(int limit, bool parallel);
