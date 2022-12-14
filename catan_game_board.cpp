@@ -1,22 +1,30 @@
 #include "catan_game_board.h"
+#include <stdexcept>
 
-Hex::Hex(int q_coord, int r_coord, int s_coord) {
+Hex::Hex(int q_coord, int r_coord) {
+    if (abs(q_coord) > 2 || abs(r_coord) > 2)
+        throw std::invalid_argument("Hex coords out of Catan range.");
+
     q = q_coord;
     r = r_coord;
-    s = s_coord;
 }
 
 bool Hex::operator==(const Hex& hex) const {
-    return (q == hex.q && r == hex.r && s == hex.s);
+    return (q == hex.q && r == hex.r);
 }
 
 HexPath::HexPath(Hex h1, Hex h2) {
-    hex_one = h1;
-    hex_two = h2;
+    if ((h1.r < h2.r) || (h1.r == h2.r && h1.q < h2.q)) {
+        hex_one = h1;
+        hex_two = h2;
+    } else {
+        hex_one = h2;
+        hex_two = h1;
+    }
 }
 
 bool HexPath::operator==(const HexPath& hp) const {
-    return ((hp.hex_one == hex_one && hp.hex_two == hex_two) || (hp.hex_one == hex_two && hp.hex_two == hex_one));
+    return (hp.hex_one == hex_one && hp.hex_two == hex_two);
 }
 
 HexIntersection::HexIntersection(HexPath h1, HexPath h2) {
@@ -39,5 +47,5 @@ bool HexIntersection::operator==(const HexIntersection& hex_int) const {
     } else {
         return first_two_paths_equal && hex_int.path_three == path_three; 
     }
-    // TODO: modify this
+    // TODO: this might be dangerous?? 
 }

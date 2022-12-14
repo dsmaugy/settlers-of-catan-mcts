@@ -2,15 +2,13 @@
 #define __HEX_GUARD
 //header file content
 
-#include <vector>
-
 class Hex {
     // represents a hexagonal tile on the catan board
     public:
-        int q, r, s;
+        int q, r;
 
         Hex() {};
-        Hex(int q, int r, int s);
+        Hex(int q, int r);
         bool operator==(const Hex& hex) const;
 };
 
@@ -34,9 +32,5 @@ class HexIntersection {
 
         bool operator==(const HexIntersection& hex_int) const;
 };
-
-
-// typedef std::pair<Hex, Hex> HexPath;
-// typedef std::vector<HexPath> HexIntersection;
 
 #endif

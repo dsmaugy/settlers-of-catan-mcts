@@ -1,9 +1,9 @@
+#include <functional>
 #include "custom_hash.h"
 
 size_t HashHex::operator()(const Hex& hex) const {
-    return ((std::hash<int>()(hex.q)
-            ^ (std::hash<int>()(hex.r) << 1)
-            ^ (std::hash<int>()(hex.s) << 1)));
+    return (std::hash<int>()(hex.q)
+            ^ (std::hash<int>()(hex.r) << 1));
 };
 
 size_t HashPath::operator()(const HexPath& road) const {
