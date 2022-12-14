@@ -2,7 +2,7 @@
 #define __CATAN_PLAYER_H__
 //header file content
 #include <unordered_set>
-#include "hex.h"
+#include "catan_game_board.h"
 
 class GameState;
 
@@ -23,8 +23,6 @@ class Player {
         int dev_cards [NUM_DEVELOPMENT_CARDS];
 
         GameState get_player_move(GameState game_state);
-
-
 };
 
 #endif

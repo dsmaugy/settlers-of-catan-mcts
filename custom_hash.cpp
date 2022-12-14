@@ -19,7 +19,7 @@ size_t HashIntersection::operator()(const HexIntersection& building) const {
     if (building.num_paths == 2) {
         return hash_value;
     } else {
-        return hash_value^HashPath()(building.path_three) << 1;
+        return (hash_value^HashPath()(building.path_three)) << 1;
     }
 };
 
