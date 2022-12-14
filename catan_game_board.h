@@ -15,10 +15,13 @@ class Hex {
 class HexPath {
     public:
         Hex hex_one, hex_two;
+        int axis;
+        
 
         HexPath() {};
         HexPath(Hex h1, Hex h2);
         bool operator==(const HexPath& hp) const;
+        bool operator< (const HexPath& hp) const;
 };
 
 class HexIntersection {
