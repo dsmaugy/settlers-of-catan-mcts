@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "catan_player.h"
-#include "hex.h"
+#include "catan_game_board.h"
 
 class GameState{
 
