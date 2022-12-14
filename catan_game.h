@@ -25,6 +25,10 @@ class GameState{
         bool is_game_over();
         Player game_winner();
         std::vector<GameState> get_all_moves();
+
+        // overloads
+        bool operator==(const GameState& state) const;
+
 };
 
 class Game {

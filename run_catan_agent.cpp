@@ -3,6 +3,7 @@
 
 #include "catan_game.h"
 #include "custom_hash.h"
+#include "catan_player_policies.h"
 
 #include <chrono>
 

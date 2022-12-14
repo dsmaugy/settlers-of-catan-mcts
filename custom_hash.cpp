@@ -63,3 +63,7 @@ size_t HashGameState::operator()(const GameState& state) const {
             ^ (HashPlayer()(state.player_two) << 1)
             ^ (HashHex()(state.robber_position)));
 };
+
+size_t HashMCTSEdge::operator()(const MCTS_Edge& edge) const {
+    return 0;
+};

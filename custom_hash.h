@@ -10,6 +10,9 @@ class HexIntersection;
 class Player;
 class GameState;
 
+typedef std::pair<GameState, GameState> MCTS_Edge;
+
+
 
 class HashHex {
     public:
@@ -34,5 +37,10 @@ class HashPlayer {
 class HashGameState {
     public:
         size_t operator()(const GameState& state) const;
+};
+
+class HashMCTSEdge {
+    public:
+        size_t operator()(const MCTS_Edge& edge) const;
 };
 #endif 

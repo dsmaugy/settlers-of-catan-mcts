@@ -3,11 +3,11 @@
 //header file content
 
 // forward declare
-class GameState;
+// class GameState;
 
-class PlayerPolicy {
-    public:
-        GameState get_best_move(GameState state);
-};
+// class PlayerPolicy {
+//     public:
+//         GameState get_best_move(GameState state);
+// };
 
 #endif
