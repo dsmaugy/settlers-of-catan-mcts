@@ -3,19 +3,19 @@
 //header file content
 
 #include <stddef.h>
-#include "hex.h"
+#include "catan_game_board.h"
 
 class HashHex {
     public:
         size_t operator()(const Hex& hex) const;
 };
 
-class HashRoads {
+class HashPath {
     public:
         size_t operator()(const HexPath& road) const;
 };
 
-class HashBuildings {
+class HashIntersection {
     public:
         size_t operator()(const HexIntersection& building) const;
 };

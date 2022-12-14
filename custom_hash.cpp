@@ -6,18 +6,20 @@ size_t HashHex::operator()(const Hex& hex) const {
             ^ (std::hash<int>()(hex.s) << 1)));
 };
 
-size_t HashRoads::operator()(const std::pair<Hex, Hex>& road) const {
-    return ((HashHex()(road.first)
-            ^ (HashHex()(road.second)) << 1));
+size_t HashPath::operator()(const HexPath& road) const {
+    return ((HashHex()(road.hex_one)
+            ^ (HashHex()(road.hex_two)) << 1));
 };
 
-size_t HashBuildings::operator()(const std::vector<std::pair<Hex, Hex>>& building) const {
+size_t HashIntersection::operator()(const HexIntersection& building) const {
     size_t hash_value;
-    for (std::pair<Hex, Hex> road: building) {
-        hash_value += HashRoads()(road);
-        hash_value <<= 1;
+    hash_value = (HashPath()(building.path_one)
+                    ^ (HashPath()(building.path_two)) << 1);
+    
+    if (building.num_paths == 2) {
+        return hash_value;
+    } else {
+        return hash_value^HashPath()(building.path_three) << 1;
     }
-
-    return hash_value;
 };
 
