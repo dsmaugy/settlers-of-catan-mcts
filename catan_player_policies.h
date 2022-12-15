@@ -17,6 +17,7 @@ class HashMCTSEdge {
 
 class RandomPolicy: public PlayerPolicy {
     public:
+        // get a random next move
         GameState *get_best_move(GameState *state);
 };
 
@@ -26,21 +27,30 @@ class MCTSPolicy: public PlayerPolicy {
         bool is_parallel;
 
         MCTSPolicy(int limit, bool parallel);
+
+        // get the best move after performing MCTS from current state for the allotted time limit
         GameState *get_best_move(GameState *state);
-        GameState *mcts_search_serial(GameState *root_state);
-        GameState *mcts_search_parallel(GameState *root_state);
 
     private:
+        // mapping between game states and rewards/visits for the game state node
         std::unordered_map<GameState, Reward_Visit_Pair, HashGameState> state_map;
-        std::unordered_map<MCTS_Edge, Reward_Visit_Pair, HashMCTSEdge> edge_map;                  // TODO: make a hash function for this
-        double get_ucb_value(GameState *state);
+
+        // mapping between game state transitions and rewards/visits for the transition
+        std::unordered_map<MCTS_Edge, Reward_Visit_Pair, HashMCTSEdge> edge_map; 
+
+        // get the UCB2 value of a particular transition
+        double get_ucb_value(GameState *parent, GameState *child);
+
+        // policy used to simulate playing the game tree
         RandomPolicy default_policy;
+
+        // update the tree in serial
         int update_mcts_serial(GameState *state, bool traverse);
+
+        // update the tree in parallel
         int update_mcts_parallel(GameState *state, bool traverse);
 
 
 };
-
-
 
 #endif

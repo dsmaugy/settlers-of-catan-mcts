@@ -8,6 +8,8 @@
 #define TIME_DIFF_MILLISECONDS(start, end) (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count())
 #define IS_IN_SET(set, elem) (set.find(elem) != set.end())
 
+
+// RANDOM POLICY
 GameState *RandomPolicy::get_best_move(GameState *state) {
     std::vector<GameState*> possible_moves = state->get_all_moves();
     int rand_move_idx = std::rand() % possible_moves.size();
@@ -20,23 +22,18 @@ GameState *RandomPolicy::get_best_move(GameState *state) {
     return possible_moves.at(rand_move_idx);
 }
 
+// MCTS POLICY
 MCTSPolicy::MCTSPolicy(int limit, bool parallel) {
     train_time_limit_sec = limit;
     is_parallel = parallel;
 }
 
-double MCTSPolicy::get_ucb_value(GameState *state) {
+double MCTSPolicy::get_ucb_value(GameState *parent, GameState* child) {
+    // TODO: implement this
     return 0;
 }
 
-
-GameState *MCTSPolicy::get_best_move(GameState *root_state) {
-    if (is_parallel)
-        return mcts_search_parallel(root_state);
-    else
-        return mcts_search_serial(root_state);
-}
-
+// TODO: consider breaking this out into another function: traverse_game_tree(GameState *state) that the parallel could use as well?
 int MCTSPolicy::update_mcts_serial(GameState *state, bool traverse) {
     // check if terminal state
     if (state->is_game_over()) {
@@ -82,29 +79,35 @@ int MCTSPolicy::update_mcts_serial(GameState *state, bool traverse) {
 
 }
 
-// state_map
-// edge_map
-GameState *MCTSPolicy::mcts_search_serial(GameState *root_state) {
+int MCTSPolicy::update_mcts_parallel(GameState *state, bool traverse) {
+    // TODO: implement
+    return 0;
+}
+
+GameState *MCTSPolicy::get_best_move(GameState *root_state) {
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     GameState *current_state = root_state;
 
     while (TIME_DIFF_MILLISECONDS(start, end) < train_time_limit_sec*1000) {
         // update MCTS for as much as we can here
-
+        if (is_parallel)
+            update_mcts_parallel(root_state, true);
+        else
+            update_mcts_serial(root_state, true);
 
         end = std::chrono::steady_clock::now();
-
-        
     }
 
-    // TODO: update this
+    // TODO: this should find the best child of root_state from map
     return root_state;
 }
 
+// state_map
+// edge_map
 
 // CUSTOM HASHING
-
 size_t HashMCTSEdge::operator()(const MCTS_Edge& edge) const {
+    // TODO: implement
     return 0;
 };
