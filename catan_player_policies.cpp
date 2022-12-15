@@ -60,7 +60,7 @@ int MCTSPolicy::update_mcts_serial(GameState *state, bool traverse) {
 
             } else {
                 // already seen this node before, see if it's the best we've seen so far
-                double current_child_ucb = get_ucb_value(child_state);
+                double current_child_ucb = get_ucb_value(state, child_state);
                 if ((state->current_turn == 0 && current_child_ucb > current_target_ucb_value)
                     || (state->current_turn == 1 && current_child_ucb < current_target_ucb_value)) {
                         current_target_ucb_value = current_child_ucb;
