@@ -2,7 +2,6 @@
 #include <unordered_map>
 
 #include "catan_game.h"
-#include "custom_hash.h"
 #include "catan_player_policies.h"
 
 #include <chrono>
@@ -28,7 +27,8 @@ int main(int argc, char** argv) {
     HexPath road_five = HexPath(hex_two, hex_four);
 
     HexPath road_one_equivalent = HexPath(hex_two, hex_one);
-
+    PlayerPolicy policy = RandomPolicy();
+    
 
     // std::unordered_map<Hex, int, HashHex> hex_map;
     // hex_map[hex_one] = -1;

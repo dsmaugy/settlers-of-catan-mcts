@@ -29,3 +29,48 @@
 //  feed into that player's policy, to get that
 //  player's move. Update the game state to the one
 // returned from the player's policy
+
+
+
+
+
+
+
+// CUSTOM HASHING
+
+size_t HashPlayer::operator()(const Player& player) const {
+    size_t cities_hash, settlements_hash, roads_hash, resource_hash, dev_cards_hash;
+    cities_hash = settlements_hash = roads_hash = resource_hash = dev_cards_hash = 0;
+
+    for (const auto& cities : player.cities)
+        cities_hash ^= HashIntersection()(cities);
+    
+
+    for (const auto& settlements : player.settlements) 
+        settlements_hash ^= HashIntersection()(settlements);
+    
+    for (const auto& road : player.roads)
+        roads_hash ^= HashPath()(road);
+
+    for (int i: player.resource_cards) 
+        resource_hash ^= (i << 1);
+    
+
+    for (int i : player.dev_cards) 
+        dev_cards_hash ^= (i << 1);
+    
+    return (std::hash<size_t>()(cities_hash)
+            ^ (std::hash<size_t>()(settlements_hash) << 1)
+            ^ (std::hash<size_t>()(roads_hash) << 1)
+            ^ (std::hash<size_t>()(resource_hash) << 1)
+            ^ (std::hash<size_t>()(dev_cards_hash) << 1));
+
+};
+
+
+size_t HashGameState::operator()(const GameState& state) const {
+    return (std::hash<int>()(state.current_turn)
+            ^ (HashPlayer()(state.player_one) << 1)
+            ^ (HashPlayer()(state.player_two) << 1)
+            ^ (HashHex()(state.robber_position)));
+};
