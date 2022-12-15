@@ -38,6 +38,10 @@ class Game {
 
     public:
         GameState game_state;
+        static std::unordered_set<Hex, HashHex> tiles;
+        static std::unordered_map<Hex, int, HashHex> tile_rewards;
+        Game() {};
+        Game(Player p1, Player p2);
 };
 
 class HashGameState {

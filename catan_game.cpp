@@ -1,6 +1,29 @@
 #include "catan_game.h"
 #include "catan_game_board.h"
 #include "catan_player.h"
+#include <unordered_set>
+#include <algorithm>
+#include <random>       // std::default_random_engine
+
+int VALUES[18] = {5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11};
+int seed = 12345;
+
+Game::Game(Player p1, Player p2) {
+    // build all of the hexes, put into tiles
+
+    std::shuffle(std::begin(VALUES), std::end(VALUES), std::default_random_engine(seed));
+
+
+    int r1 = 0, r2 = 3;
+
+    for (int q = -3; q <= 3; q++) {
+        for (int r = r1; r <= r2; r++) {
+            Hex h = Hex(q,r);
+            tiles.insert(h);
+
+        }
+    }
+}
 
 // Keep a list of possible road locations, update as you build roads
 // Same for settlement sites
