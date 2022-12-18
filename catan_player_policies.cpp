@@ -73,6 +73,11 @@ GameState *MCTSPolicy::get_best_move(GameState *root_state) {
         }
     }
 
+    // free other states
+    for (const auto& child_state : possible_moves) {
+        if (child_state != best_state) delete child_state;  // TODO: maybe want to verify if this actually works with print debug
+    }
+
     return best_state;
 }
 
