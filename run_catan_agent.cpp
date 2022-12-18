@@ -37,8 +37,13 @@ int main(int argc, char** argv) {
     road_map[road_one] = 21;
     road_map[road_two] = 22;
     road_map[road_three] = 23;
-    road_map[road_four] = 24;
-    road_map[road_five] = 25;
+    road_map[road_four] += 24;
+    road_map[road_five] += 25;
+
+    Hex test_hex = Hex(1, 1);
+    std::unordered_map<Hex, Reward_Visit_Pair, HashHex> state_map;
+    state_map[test_hex].first += 5;
+    std::cout << "TH1: " << state_map[test_hex].first << " TH2: " << state_map[test_hex].second << std::endl;
 
     // std::unordered_map<HexIntersection, int, HashIntersection> building_map;
     //     HexIntersection building_two = {road_one, road_two};

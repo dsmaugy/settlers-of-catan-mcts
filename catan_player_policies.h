@@ -17,8 +17,7 @@ class HashMCTSEdge {
 
 class RandomPolicy: public PlayerPolicy {
     public:
-        // get a random next move
-        GameState *get_best_move(GameState *state);
+        GameState *get_best_move(GameState *root_state);
 };
 
 class MCTSPolicy: public PlayerPolicy {
@@ -27,29 +26,19 @@ class MCTSPolicy: public PlayerPolicy {
         bool is_parallel;
 
         MCTSPolicy(int limit, bool parallel);
-
-        // get the best move after performing MCTS from current state for the allotted time limit
-        GameState *get_best_move(GameState *state);
+        GameState *get_best_move(GameState *root_state);
 
     private:
         // mapping between game states and rewards/visits for the game state node
         std::unordered_map<GameState, Reward_Visit_Pair, HashGameState> state_map;
-
-        // mapping between game state transitions and rewards/visits for the transition
-        std::unordered_map<MCTS_Edge, Reward_Visit_Pair, HashMCTSEdge> edge_map; 
-
-        // get the UCB2 value of a particular transition
-        double get_ucb_value(GameState *parent, GameState *child);
-
-        // policy used to simulate playing the game tree
+        std::unordered_map<MCTS_Edge, Reward_Visit_Pair, HashMCTSEdge> edge_map;
+        double get_ucb_value(GameState *parent_state, GameState *child_state);
         RandomPolicy default_policy;
+        void update_mcts(GameState *state);
 
-        // update the tree in serial
-        int update_mcts_serial(GameState *state, bool traverse);
-
-        // update the tree in parallel
-        int update_mcts_parallel(GameState *state, bool traverse);
-
+        // simulate playout(s) to terminal state, will do multiple simulations in parallel if policy object has is_parallel set to true 
+        // Return pair should hold playout stats for all simulations in this group.
+        Reward_Visit_Pair mcts_simulation(GameState *state);
 
 };
 

@@ -1,6 +1,7 @@
 #include <chrono>
 #include <stdlib.h>
 #include <climits>
+#include <stack>
 
 #include "catan_player_policies.h"
 #include "catan_game.h"
@@ -8,10 +9,8 @@
 #define TIME_DIFF_MILLISECONDS(start, end) (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count())
 #define IS_IN_SET(set, elem) (set.find(elem) != set.end())
 
-
-// RANDOM POLICY
-GameState *RandomPolicy::get_best_move(GameState *state) {
-    std::vector<GameState*> possible_moves = state->get_all_moves();
+GameState *RandomPolicy::get_best_move(GameState *root_state) {
+    std::vector<GameState*> possible_moves = root_state->get_all_moves();
     int rand_move_idx = std::rand() % possible_moves.size();
 
     for (int i=0; i < possible_moves.size(); i++) {
@@ -28,86 +27,125 @@ MCTSPolicy::MCTSPolicy(int limit, bool parallel) {
     is_parallel = parallel;
 }
 
-double MCTSPolicy::get_ucb_value(GameState *parent, GameState* child) {
-    // TODO: implement this
+double MCTSPolicy::get_ucb_value(GameState *parent_state, GameState *child_state) {
+    // TODO
     return 0;
 }
 
-// TODO: consider breaking this out into another function: traverse_game_tree(GameState *state) that the parallel could use as well?
-int MCTSPolicy::update_mcts_serial(GameState *state, bool traverse) {
-    // check if terminal state
-    if (state->is_game_over()) {
-        if (state->game_winner() == state->player_one)
-            return 1;
-        else
-            return -1;
-    }
+Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
+    Reward_Visit_Pair outcome = std::make_pair(0, 0);
+    RandomPolicy random_picker;
 
-    if (traverse) {
-        std::vector<GameState*> possible_moves = state->get_all_moves();
-        GameState current_target_child_state;       // will hold best move to make
-        double current_target_ucb_value;
-
-        if (state->current_turn == 0)
-            current_target_ucb_value = __DBL_MIN__;
-        else
-            current_target_ucb_value = __DBL_MAX__;
-
-        for (const auto& child_state : possible_moves) {
-            MCTS_Edge parent_child_edge = std::make_pair(*state, *child_state);
-            if (!IS_IN_SET(edge_map, parent_child_edge)) {
-                // encountered a leaf node, start simulating from here
-
-            } else {
-                // already seen this node before, see if it's the best we've seen so far
-                double current_child_ucb = get_ucb_value(state, child_state);
-                if ((state->current_turn == 0 && current_child_ucb > current_target_ucb_value)
-                    || (state->current_turn == 1 && current_child_ucb < current_target_ucb_value)) {
-                        current_target_ucb_value = current_child_ucb;
-                        current_target_child_state = *child_state;
-                }
-            }
-        }
-
-
-        // TODO: free all other moves that we're not going down
+    if (is_parallel) {
+        // TODO
     } else {
-        // simulating tree from here, policy = random
-        // play until terminal node
-        return update_mcts_serial(default_policy.get_best_move(state), false);
+        GameState *current_state = state;
+        while (!current_state->is_game_over()) current_state = random_picker.get_best_move(current_state);
+        outcome.second = 1;
+        if (current_state->game_winner() == current_state->player_one) outcome.first = 1;
     }
 
+    return outcome;
 }
 
-int MCTSPolicy::update_mcts_parallel(GameState *state, bool traverse) {
-    // TODO: implement
-    return 0;
-}
 
 GameState *MCTSPolicy::get_best_move(GameState *root_state) {
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     GameState *current_state = root_state;
 
+    // update the tree for as much time as we can
     while (TIME_DIFF_MILLISECONDS(start, end) < train_time_limit_sec*1000) {
-        // update MCTS for as much as we can here
-        if (is_parallel)
-            update_mcts_parallel(root_state, true);
-        else
-            update_mcts_serial(root_state, true);
-
+        update_mcts(root_state);
         end = std::chrono::steady_clock::now();
     }
 
-    // TODO: this should find the best child of root_state from map
-    return root_state;
+    // from current state, find state with best reward averages
+    std::vector<GameState*> possible_moves = root_state->get_all_moves();
+    double max_average_value = __DBL_MIN__;
+    GameState *best_state;
+
+    for (const auto& child_state : possible_moves) {
+        double child_average = ((double) state_map[*child_state].first) / state_map[*child_state].second;
+        if (child_average > max_average_value) {
+            max_average_value = child_average;
+            best_state = child_state;
+        }
+    }
+
+    return best_state;
 }
 
-// state_map
-// edge_map
+void MCTSPolicy::update_mcts(GameState *root_state) {
+    std::stack<GameState*> explore_tree_path;
+    GameState *current_state;
+    MCTS_Edge parent_child_edge;
+    
+    current_state = root_state;
+    explore_tree_path.push(current_state);
+    bool encountered_leaf = false;
+    while (!current_state->is_game_over() && !encountered_leaf) { 
+        std::vector<GameState*> possible_moves = current_state->get_all_moves();
+        GameState* current_target_child_state;       // will hold best move to make
+        double current_target_ucb_value;
+
+        if (current_state->current_turn == 0)
+            current_target_ucb_value = __DBL_MIN__;
+        else
+            current_target_ucb_value = __DBL_MAX__;
+
+        for (const auto& child_state : possible_moves) {
+            MCTS_Edge parent_child_edge = std::make_pair(*current_state, *child_state);
+            if (!IS_IN_SET(edge_map, parent_child_edge)) {
+                // encountered a leaf node
+                explore_tree_path.push(child_state);
+                encountered_leaf = true;
+                break;
+            } else {
+                // already seen this node before, see if it's the best we've seen so far
+                double current_child_ucb = get_ucb_value(current_state, child_state);
+                if ((current_state->current_turn == 0 && current_child_ucb > current_target_ucb_value)
+                    || (current_state->current_turn == 1 && current_child_ucb < current_target_ucb_value)) {
+                        current_target_ucb_value = current_child_ucb;
+                        current_target_child_state = child_state;
+                }
+            }
+        }
+
+        // go down best UCB child
+        explore_tree_path.push(current_target_child_state);
+        current_state = current_target_child_state;
+    }
+
+    // at this point *current_state should hold the leaf node, we can start simulating from here
+    Reward_Visit_Pair simulation_outcome = mcts_simulation(root_state);
+
+    // propagate the results back up the tree
+    // accessing the state/edge map with array notation should initialize values if they don't exist
+    // not sure if super safe but whatever
+    GameState *backtrack_child_state = explore_tree_path.top();
+    state_map[*backtrack_child_state].first += simulation_outcome.first;     // update leaf node manually as we're gonna update by the parent in the loop
+    state_map[*backtrack_child_state].second += simulation_outcome.second;
+
+
+    while(!explore_tree_path.empty()) {
+        // get one more node up the stack
+        explore_tree_path.pop();
+        GameState *backtrack_parent_state = explore_tree_path.top();
+
+        MCTS_Edge parent_child_edge = std::make_pair(*backtrack_parent_state, *backtrack_child_state);
+        state_map[*backtrack_parent_state].first += simulation_outcome.first;
+        state_map[*backtrack_parent_state].second += simulation_outcome.second;
+        edge_map[parent_child_edge].first += simulation_outcome.first;
+        edge_map[parent_child_edge].second += simulation_outcome.second;
+
+        backtrack_child_state = backtrack_parent_state;
+    }  
+
+}
 
 // CUSTOM HASHING
 size_t HashMCTSEdge::operator()(const MCTS_Edge& edge) const {
-    // TODO: implement
-    return 0;
+    return (HashGameState()(edge.first)
+            ^ (HashGameState()(edge.second) << 1));
 };
