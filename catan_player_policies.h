@@ -17,7 +17,7 @@ class HashMCTSEdge {
 
 class RandomPolicy: public PlayerPolicy {
     public:
-        GameState *get_best_move(GameState *state);
+        GameState *get_best_move(GameState *root_state);
 };
 
 class MCTSPolicy: public PlayerPolicy {
@@ -26,22 +26,18 @@ class MCTSPolicy: public PlayerPolicy {
         bool is_parallel;
 
         MCTSPolicy(int limit, bool parallel);
-        GameState *get_best_move(GameState *state);
+        GameState *get_best_move(GameState *root_state);
 
     private:
         std::unordered_map<GameState, Reward_Visit_Pair, HashGameState> state_map;
-        std::unordered_map<MCTS_Edge, Reward_Visit_Pair, HashMCTSEdge> edge_map;                  // TODO: make a hash function for this
+        std::unordered_map<MCTS_Edge, Reward_Visit_Pair, HashMCTSEdge> edge_map;
         double get_ucb_value(GameState *parent_state, GameState *child_state);
         RandomPolicy default_policy;
         void update_mcts(GameState *state);
-        // int update_mcts_parallel(GameState *state, bool traverse);
 
-        // simulate a single serial playout to terminal state. Return pair will either be <0, 1> or <1, 1>
-        Reward_Visit_Pair mcts_simulation_serial(GameState *state); 
-
-        // simulate multiple playouts to terminal state in parallel. 
+        // simulate playout(s) to terminal state, will do multiple simulations in parallel if policy object has is_parallel set to true 
         // Return pair should hold playout stats for all simulations in this group.
-        Reward_Visit_Pair mcts_simulation_parallel(GameState *state);
+        Reward_Visit_Pair mcts_simulation(GameState *state);
 
 };
 

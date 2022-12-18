@@ -10,9 +10,6 @@
 #include "catan_player.h"
 
 
-// forward declarations
-class Player;
-
 class GameState{
 
     public:
