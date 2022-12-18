@@ -112,6 +112,11 @@ void MCTSPolicy::update_mcts(GameState *root_state) {
             }
         }
 
+        // free all other moves
+        for (const auto& child_state: possible_moves) {
+            if (child_state != current_target_child_state) delete child_state; // TODO: maybe want to verify if this actually works with print debug
+        }
+
         // go down best UCB child
         explore_tree_path.push(current_target_child_state);
         current_state = current_target_child_state;
@@ -139,8 +144,9 @@ void MCTSPolicy::update_mcts(GameState *root_state) {
         edge_map[parent_child_edge].first += simulation_outcome.first;
         edge_map[parent_child_edge].second += simulation_outcome.second;
 
+        delete backtrack_child_state;
         backtrack_child_state = backtrack_parent_state;
-    }  
+    }
 
 }
 
