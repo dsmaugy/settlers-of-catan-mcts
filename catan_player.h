@@ -27,6 +27,7 @@ class Player {
         int resource_cards [NUM_RESOURCES];
         int dev_cards [NUM_DEVELOPMENT_CARDS];
 
+        // Given the current game state, returns a move the player will make following its policy
         GameState *get_player_move(GameState *game_state);
 
         // overloads

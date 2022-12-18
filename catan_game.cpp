@@ -25,10 +25,10 @@
 // Next move func
 
 //  roll die, collect resources for all players
-//  for current player, call get_all_moves(),
-//  feed into that player's policy, to get that
-//  player's move. Update the game state to the one
+//  for current player, feed current GameState to get_player_move to get that player's move
+//  Update the GameState to the one
 // returned from the player's policy
+// (need to free the old GameState as the one returned from the player's policy will have been allocated on the heap by get_all_moves())
 
 
 

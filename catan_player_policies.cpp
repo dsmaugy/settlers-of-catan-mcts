@@ -39,6 +39,7 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
     if (is_parallel) {
         // TODO
     } else {
+        // TODO: factor in dice roll
         GameState *current_state = state;
         while (!current_state->is_game_over()) current_state = random_picker.get_best_move(current_state);
         outcome.second = 1;
@@ -89,7 +90,8 @@ void MCTSPolicy::update_mcts(GameState *root_state) {
     current_state = root_state;
     explore_tree_path.push(current_state);
     bool encountered_leaf = false;
-    while (!current_state->is_game_over() && !encountered_leaf) { 
+    while (!current_state->is_game_over() && !encountered_leaf) {
+        // TODO: factor in dice roll 
         std::vector<GameState*> possible_moves = current_state->get_all_moves();
         GameState* current_target_child_state;       // will hold best move to make
         double current_target_ucb_value;
