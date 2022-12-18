@@ -27,17 +27,21 @@ class MCTSPolicy: public PlayerPolicy {
 
         MCTSPolicy(int limit, bool parallel);
         GameState *get_best_move(GameState *state);
-        GameState *mcts_search_serial(GameState *root_state);
-        GameState *mcts_search_parallel(GameState *root_state);
 
     private:
         std::unordered_map<GameState, Reward_Visit_Pair, HashGameState> state_map;
         std::unordered_map<MCTS_Edge, Reward_Visit_Pair, HashMCTSEdge> edge_map;                  // TODO: make a hash function for this
-        double get_ucb_value(GameState *state);
+        double get_ucb_value(GameState *parent_state, GameState *child_state);
         RandomPolicy default_policy;
-        int update_mcts_serial(GameState *state, bool traverse);
-        int update_mcts_parallel(GameState *state, bool traverse);
+        void update_mcts(GameState *state);
+        // int update_mcts_parallel(GameState *state, bool traverse);
 
+        // simulate a single serial playout to terminal state. Return pair will either be <0, 1> or <1, 1>
+        Reward_Visit_Pair mcts_simulation_serial(GameState *state); 
+
+        // simulate multiple playouts to terminal state in parallel. 
+        // Return pair should hold playout stats for all simulations in this group.
+        Reward_Visit_Pair mcts_simulation_parallel(GameState *state);
 
 };
 
