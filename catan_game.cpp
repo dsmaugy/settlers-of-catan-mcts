@@ -18,16 +18,15 @@ int seed = 12345;
 //     GameState::tiles = tiles;
 // }
 
+// GameState::std::unordered_set<Hex, HashHex> tiles;
+// GameState::std::unordered_map<Hex, int, HashHex> tile_rewards;
+
 
 // Initialize the game board (Hexes), initial game state?
 Game::Game(Player p1, Player p2) {
-    // GameState::tiles = 
-    std::unordered_set<Hex, HashHex> tiles;
-    // GameState::tile_rewards = 
-    std::unordered_map<Hex, int, HashHex> tile_rewards;
-
     // Create the board tiles
-    
+    std::unordered_set<Hex, HashHex> tiles;
+    std::unordered_map<Hex, int, HashHex> tile_rewards;
 
     std::shuffle(std::begin(VALUES), std::end(VALUES), std::default_random_engine(seed));
     std::shuffle(std::begin(LAND), std::end(LAND), std::default_random_engine(seed));
@@ -63,12 +62,10 @@ Game::Game(Player p1, Player p2) {
         else 
             r2--;
     }
-
     // instantiate the GameState, populate the hex list and map
+    game_state = GameState(p1, p2, robber_pos, 1);
     GameState::tiles = tiles;
     GameState::tile_rewards = tile_rewards;
-
-    game_state = GameState(p1, p2, robber_pos, 1);
 }
 
 // random int in range [min,max]
