@@ -19,13 +19,13 @@ int main(int argc, char** argv) {
 
 
 
-    /*
+    
 
 
-    Hex hex_one = Hex(0, 0);
-    Hex hex_two = Hex(1, -1);
-    Hex hex_three = Hex(1, 0);
-    Hex hex_four = Hex(0, -1);
+    Hex hex_one = Hex(0, 0, 0);
+    Hex hex_two = Hex(1, -1, 0);
+    Hex hex_three = Hex(1, 0, 0);
+    Hex hex_four = Hex(0, -1, 0);
 
     HexPath road_one = HexPath(hex_one, hex_two);
     HexPath road_two = HexPath(hex_one, hex_three);
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     road_map[road_four] += 24;
     road_map[road_five] += 25;
 
-    Hex test_hex = Hex(1, 1);
+    Hex test_hex = Hex(1, 1, 0);
     std::unordered_map<Hex, Reward_Visit_Pair, HashHex> state_map;
     state_map[test_hex].first += 5;
     std::cout << "TH1: " << state_map[test_hex].first << " TH2: " << state_map[test_hex].second << std::endl;
@@ -88,6 +88,6 @@ int main(int argc, char** argv) {
     //     std::cout << "Running program with " << omp_get_num_threads() << " threads out of max " << omp_get_max_threads() << std::endl;
     // }
 
-    */
+    
     return 0;
 }
