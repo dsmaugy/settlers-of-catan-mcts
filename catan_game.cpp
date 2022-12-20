@@ -56,13 +56,27 @@ Game::Game(Player p1, Player p2) {
             r2--;
     }
 
-    // instantiate the GameState
+    // instantiate the GameState, populate the hex list and map
     game_state = GameState(p1, p2, robber_pos, 1);
+    GameState::tiles = tiles;
+    GameState::tile_rewards = tile_rewards;
 }
 
+// random int in range [min,max]
+int roll(int min, int max) {
+    int die = rand() % (min - max + 1) + min;
+}
 
 void Game::update_state_with_dice_roll(GameState *state) {
-    // TODO
+    // roll dice
+    int dice = roll(1,6) + roll(1,6);
+    
+    //TODO: what if its a 7?
+
+    
+
+
+
 }
 
 // GAME STATE DEFINITIONS
@@ -75,24 +89,24 @@ GameState::GameState(Player p1, Player p2, Hex robber_pos, int turn) {
 }
 
 bool GameState::is_game_over() {
-    // TODO
+    // TODO:
     return false;
 }
 
 Player GameState::game_winner() {
-    // TODO
+    // TODO:
     return player_one;
 }
 
 std::vector<GameState*> GameState::get_all_moves() {
-    // TODO
+    // TODO:
     std::vector<GameState*> all_moves;
     
     return all_moves;
 }
 
 bool GameState::operator==(const GameState& state) const {
-    // TODO
+    // TODO:
     return false;
 }
 
