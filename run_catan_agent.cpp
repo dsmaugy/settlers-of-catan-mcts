@@ -15,6 +15,9 @@ int main(int argc, char** argv) {
 
     // args: p1_model p2_model time_limit num_games
 
+    // GameState::tiles = unordered_set<Hex> tiles;
+    // GameState::tile_rewards = unordered_map<Hex> tile_rewards;
+
     Game g = Game(Player(), Player());
 
 
@@ -56,6 +59,15 @@ int main(int argc, char** argv) {
 
     HexIntersection building_one = HexIntersection(road_one, road_two, road_three);
     HexIntersection building_two = HexIntersection(road_one, road_four, road_five);
+
+    for(const auto& hex: building_one.adjacent){
+        std::cout << "hex: q=" << hex.q << ", r=" << hex.r << std::endl;
+    }
+
+    for(const auto& hex: building_two.adjacent){
+        std::cout << "hex: q=" << hex.q << ", r=" << hex.r << std::endl;
+    }
+
 
     std::cout << " r1: " << road_map[building_one.path_one] << ", r2: " << road_map[building_one.path_two] << ", r3: " << road_map[building_one.path_three] <<std::endl;
     std::cout << " r1: " << road_map[building_two.path_one] << ", r2: " << road_map[building_two.path_two] << ", r3: " << road_map[building_two.path_three] <<std::endl;

@@ -3,6 +3,9 @@
 //header file content
 
 #include <cstddef>
+#include <unordered_set>
+
+class HashHex;
 
 class Hex {
     // represents a hexagonal tile on the catan board
@@ -26,10 +29,16 @@ class HexPath {
         bool operator< (const HexPath& hp) const;
 };
 
+class HashHex {
+    public:
+        size_t operator()(const Hex& hex) const;
+};
+
 class HexIntersection {
     public:
         HexPath path_one, path_two, path_three;
         int num_paths;
+        std::unordered_set<Hex, HashHex> adjacent;
 
         HexIntersection() {};
         HexIntersection(HexPath h1, HexPath h2);
@@ -40,10 +49,6 @@ class HexIntersection {
 
 // CUSTOM HASHING DEFINITIONS
 
-class HashHex {
-    public:
-        size_t operator()(const Hex& hex) const;
-};
 
 class HashPath {
     public:

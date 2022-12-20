@@ -27,6 +27,8 @@ class Player {
         int resource_cards [NUM_RESOURCES];
         int dev_cards [NUM_DEVELOPMENT_CARDS];
 
+        // TODO: add victory points count 
+
         // constructor
         Player(PlayerPolicy *policy);
         Player() {};

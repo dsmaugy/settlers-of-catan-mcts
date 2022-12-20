@@ -14,12 +14,20 @@ int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4}; //wheat, wood, wool, ore, 
 int seed = 12345;
 
 
+// GameState::unordered_set<Hex, HashHex> init_set(unordered_set<Hex,HashHex> tiles){
+//     GameState::tiles = tiles;
+// }
+
 
 // Initialize the game board (Hexes), initial game state?
 Game::Game(Player p1, Player p2) {
-    // Create the board tiles
+    // GameState::tiles = 
     std::unordered_set<Hex, HashHex> tiles;
+    // GameState::tile_rewards = 
     std::unordered_map<Hex, int, HashHex> tile_rewards;
+
+    // Create the board tiles
+    
 
     std::shuffle(std::begin(VALUES), std::end(VALUES), std::default_random_engine(seed));
     std::shuffle(std::begin(LAND), std::end(LAND), std::default_random_engine(seed));
@@ -57,14 +65,15 @@ Game::Game(Player p1, Player p2) {
     }
 
     // instantiate the GameState, populate the hex list and map
+    // GameState::tiles = tiles;
+    // GameState::tile_rewards = tile_rewards;
+
     game_state = GameState(p1, p2, robber_pos, 1);
-    GameState::tiles = tiles;
-    GameState::tile_rewards = tile_rewards;
 }
 
 // random int in range [min,max]
 int roll(int min, int max) {
-    int die = rand() % (min - max + 1) + min;
+    return rand() % (min - max + 1) + min;
 }
 
 void Game::update_state_with_dice_roll(GameState *state) {
@@ -73,11 +82,31 @@ void Game::update_state_with_dice_roll(GameState *state) {
     
     //TODO: what if its a 7?
 
+    Player p1 = state->player_one;
+    Player p2 = state->player_two;
+    int land_type;
+
+    // p1 update
+    for(const auto& settlement: p1.settlements){
+        for (const auto& hex: settlement.adjacent){
+            if (GameState::tile_rewards[hex] == dice) {
+                if ((land_type = hex.land_type) != -1) p1.resource_cards[land_type] += 1;
+            }
+        }
+    }
+
+    // p2 update
+    for(const auto& settlement: p2.settlements){
+        for (const auto& hex: settlement.adjacent){
+            if (GameState::tile_rewards[hex] == dice) {
+                if ((land_type = hex.land_type) != -1) p2.resource_cards[land_type] += 1;
+            }
+        }
+    }
     
-
-
-
+    // std::cout << "hex: q=" << hex.q << ", r=" << hex.r << std::endl;
 }
+
 
 // GAME STATE DEFINITIONS
 
@@ -89,25 +118,38 @@ GameState::GameState(Player p1, Player p2, Hex robber_pos, int turn) {
 }
 
 bool GameState::is_game_over() {
-    // TODO:
-    return false;
+    // TODO: ensure this is valid
+    return (player_one.points == 11) || (player_two.points == 11);
+    // return false;
 }
 
 Player GameState::game_winner() {
-    // TODO:
-    return player_one;
+    // TODO: ensure this is valid
+    Player winner = (player_one.points == 11) ? player_one : player_two; 
+    return winner;
 }
 
 std::vector<GameState*> GameState::get_all_moves() {
-    // TODO:
+    // TODO: 
     std::vector<GameState*> all_moves;
     
     return all_moves;
 }
 
 bool GameState::operator==(const GameState& state) const {
-    // TODO:
-    return false;
+    // TODO: ensure this is valid
+
+    // check if both players are the same
+    if (player_one != state.player_one) return false;
+    if (player_two != state.player_two) return false;
+
+    // robber on the same position
+    if (robber_position != state.robber_position) return false;
+
+    // check turn
+    if (current_turn != state.current_turn) return false;
+
+    return true;
 }
 
 // GAME PLAYER DEFINITIONS
@@ -120,6 +162,7 @@ Player::Player(PlayerPolicy *policy) {
     for (int i = 0; i < NUM_RESOURCES; i++) resource_cards[i] = 0;
 }
 
+// TODO: add points check here
 bool Player::operator==(const Player& player) const {
     // check all resources same
     for (int i=0; i < NUM_RESOURCES; i++) {

@@ -18,7 +18,7 @@ Hex::Hex(int q_coord, int r_coord, int lt) {
 }
 
 bool Hex::operator==(const Hex& hex) const {
-    return (q == hex.q && r == hex.r);
+    return (q == hex.q && r == hex.r && land_type == hex.land_type);
 }
 
 HexPath::HexPath(Hex h1, Hex h2) {
@@ -56,6 +56,12 @@ HexIntersection::HexIntersection(HexPath h1, HexPath h2) {
     }
 
     num_paths = 2;
+
+    // insert into set (to avoid duplicates later)
+    adjacent.insert(h1.hex_one);
+    adjacent.insert(h1.hex_two);
+    adjacent.insert(h2.hex_one);
+    adjacent.insert(h2.hex_two);
 }
 
 HexIntersection::HexIntersection(HexPath h1, HexPath h2, HexPath h3) {
@@ -67,6 +73,14 @@ HexIntersection::HexIntersection(HexPath h1, HexPath h2, HexPath h3) {
     path_two = paths[1];
     path_three = paths[2];
     num_paths = 3;
+
+    // insert into set (to avoid duplicates later)
+    adjacent.insert(h1.hex_one);
+    adjacent.insert(h1.hex_two);
+    adjacent.insert(h2.hex_one);
+    adjacent.insert(h2.hex_two);
+    adjacent.insert(h3.hex_one);
+    adjacent.insert(h3.hex_two);
 }
 
 bool HexIntersection::operator==(const HexIntersection& hex_int) const {
