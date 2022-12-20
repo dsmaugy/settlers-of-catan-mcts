@@ -7,10 +7,10 @@
 class Hex {
     // represents a hexagonal tile on the catan board
     public:
-        int q, r;
+        int q, r, land_type; // [0-4], -1 = OOB/Desert
 
         Hex() {};
-        Hex(int q, int r);
+        Hex(int q, int r, int land_type);
         bool operator==(const Hex& hex) const;
 };
 

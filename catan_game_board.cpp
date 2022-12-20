@@ -7,12 +7,14 @@ enum Axis {
     Q = 0, R = 1, S = 2
 };
 
-Hex::Hex(int q_coord, int r_coord) {
-    if (abs(q_coord) > 2 || abs(r_coord) > 2)
-        throw std::invalid_argument("Hex coords out of Catan range.");
+Hex::Hex(int q_coord, int r_coord, int lt) {
+    // if (abs(q_coord) > 2 || abs(r_coord) > 2)
+        // throw std::invalid_argument("Hex coords out of Catan range.");
 
     q = q_coord;
     r = r_coord;
+    land_type = lt;
+
 }
 
 bool Hex::operator==(const Hex& hex) const {
