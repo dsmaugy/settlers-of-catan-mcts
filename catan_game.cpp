@@ -75,6 +75,10 @@ bool GameState::operator==(const GameState& state) const {
 
 Player::Player(PlayerPolicy *policy) {
     player_policy = policy;
+
+    // init resource cards and dev values
+    for (int i = 0; i < NUM_DEVELOPMENT_CARDS; i++) dev_cards[i] = 0;
+    for (int i = 0; i < NUM_RESOURCES; i++) resource_cards[i] = 0;
 }
 
 bool Player::operator==(const Player& player) const {

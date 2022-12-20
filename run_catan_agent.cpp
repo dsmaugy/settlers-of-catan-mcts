@@ -56,9 +56,18 @@ int main(int argc, char** argv) {
     std::cout << " r1: " << road_map[building_two.path_one] << ", r2: " << road_map[building_two.path_two] << ", r3: " << road_map[building_two.path_three] <<std::endl;
 
 
-    RandomPolicy policy = RandomPolicy();
-    Player p1 = Player(&policy);
-    std::cout << "Cities: " << p1.cities.size() << std::endl;
+    RandomPolicy random_policy = RandomPolicy();
+    MCTSPolicy mcts_policy = MCTSPolicy(5, true);
+    Player p1 = Player(&random_policy);
+    Player p2 = Player(&mcts_policy);
+
+    p2.cities.insert(building_one);
+    p1.cities.insert(building_one);
+
+    std::cout << "p1==p2?: " << (p1 == p2) << std::endl;
+    // for (const auto& i : p1.resource_cards) {
+    //     std::cout << i << std::endl;
+    // }
     // building_map[building_one] = 18;
     // building_map[building_two] = 17;
 
