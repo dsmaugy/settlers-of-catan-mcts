@@ -5,34 +5,59 @@
 #include <algorithm>
 #include <random>       // std::default_random_engine
 
+// #include <iostream>
+
 #define IS_IN_SET(set, elem) (set.find(elem) != set.end())
 
 int VALUES[19] = {5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11,7}; // 7 isn't a valid reward amt, but is used to randomly assign the desert
-int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4};
+int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4}; //wheat, wood, wool, ore, brick (-1 = nothing/desert)
 int seed = 12345;
 
 
+
+// Initialize the game board (Hexes), initial game state?
 Game::Game(Player p1, Player p2) {
-    // build all of the hexes, put into tiles
+    // Create the board tiles
+    std::unordered_set<Hex, HashHex> tiles;
+    std::unordered_map<Hex, int, HashHex> tile_rewards;
 
     std::shuffle(std::begin(VALUES), std::end(VALUES), std::default_random_engine(seed));
     std::shuffle(std::begin(LAND), std::end(LAND), std::default_random_engine(seed));
 
-    // int r1 = 0, r2 = 3, i = 0;
+    int r1 = 0, r2 = 3, v = 0, l = 0;
+    int val;
 
-    // for (int q = -3; q <= 3; q++) {
-    //     for (int r = r1; r <= r2; r++) {
-    //         Hex h = Hex(q,r); // change constructor to assign type
-    //         tiles.insert(h);
-    //         tile_rewards[h] = VALUES[i];
+    Hex robber_pos;
 
-    //         i++;
-    //     }
-    //     if (q < 0)
-    //         r1--;
-    //     else
-    //         r2--;
-    // }
+    for (int q = -3; q <= 3; q++) {
+        for (int r = r1; r <= r2; r++) {
+            // if out of bounds
+            if (abs(q) == 3 || abs(r) == 3 || abs(-q-r) == 3) {
+                tiles.insert(Hex(q,r, -1));
+                // std::cout << "Hex at (" << q << "," << r << ") has land value " << -1 << " and reward value -----" <<std::endl; 
+
+            } else {
+                Hex h;
+        
+                if((val = VALUES[v++]) == 7){
+                    h = Hex(q,r, -1);   // Desert tile
+                    robber_pos = h;
+                } else {
+                    h = Hex(q,r, LAND[l++]);
+                }
+                // std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v=" << v*/ <<std::endl; 
+                tiles.insert(h);
+                tile_rewards[h] = val;
+            }
+        }
+        if (q < 0) 
+            r1--;
+        else 
+            r2--;
+    }
+
+    // instantiate the GameState
+    game_state = GameState(p1, p2, robber_pos, 1);
 }
 
 

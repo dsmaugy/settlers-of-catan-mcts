@@ -15,6 +15,11 @@ int main(int argc, char** argv) {
 
     // args: p1_model p2_model time_limit num_games
 
+    Game g = Game(Player(), Player());
+
+
+
+    /*
 
 
     Hex hex_one = Hex(0, 0);
@@ -73,5 +78,7 @@ int main(int argc, char** argv) {
     //     if (omp_get_thread_num() == 0) 
     //     std::cout << "Running program with " << omp_get_num_threads() << " threads out of max " << omp_get_max_threads() << std::endl;
     // }
+
+    */
     return 0;
 }
