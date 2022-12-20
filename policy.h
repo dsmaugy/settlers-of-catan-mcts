@@ -8,7 +8,6 @@ class GameState;
 class PlayerPolicy {
     public:
         virtual GameState *get_best_move(GameState *root_state) = 0;
-        // PlayerPolicy() {};  // this should never be called
 };
 
 #endif

@@ -87,7 +87,7 @@ Player GameState::game_winner() {
 std::vector<GameState*> GameState::get_all_moves() {
     // TODO
     std::vector<GameState*> all_moves;
-
+    
     return all_moves;
 }
 

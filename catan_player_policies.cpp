@@ -46,7 +46,7 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
         // TODO: implement
         #pragma omp parallel default(none) reduction(+:reward) reduction(+:visit)
         {
-            
+            state->get_all_moves();
         }
     } else {
         // TODO: factor in dice roll
@@ -85,7 +85,7 @@ GameState *MCTSPolicy::get_best_move(GameState *root_state) {
 
     // free other states
     for (const auto& child_state : possible_moves) {
-        if (child_state != best_state) delete child_state;  // TODO: maybe want to verify if this actually works with print debug
+        if (child_state != best_state) delete child_state; // TODO: maybe want to verify if this actually works with print debug
     }
 
     return best_state;
