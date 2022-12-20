@@ -18,8 +18,8 @@ int seed = 12345;
 //     GameState::tiles = tiles;
 // }
 
-// GameState::std::unordered_set<Hex, HashHex> tiles;
-// GameState::std::unordered_map<Hex, int, HashHex> tile_rewards;
+std::unordered_set<Hex, HashHex> GameState::tiles;
+std::unordered_map<Hex, int, HashHex> GameState::tile_rewards;
 
 
 // Initialize the game board (Hexes), initial game state?

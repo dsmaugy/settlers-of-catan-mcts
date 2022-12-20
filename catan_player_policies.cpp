@@ -46,7 +46,7 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
         // TODO: implement
         #pragma omp parallel default(none) reduction(+:reward) reduction(+:visit)
         {
-            state->get_all_moves();
+            // state->get_all_moves();
         }
     } else {
         // TODO: factor in dice roll
