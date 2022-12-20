@@ -49,8 +49,8 @@ int main(int argc, char** argv) {
     // std::unordered_map<HexIntersection, int, HashIntersection> building_map;
     //     HexIntersection building_two = {road_one, road_two};
 
-    HexIntersection building_one = {road_one, road_two, road_three};
-    HexIntersection building_two = {road_one, road_four, road_five};
+    HexIntersection building_one = HexIntersection(road_one, road_two, road_three);
+    HexIntersection building_two = HexIntersection(road_one, road_four, road_five);
 
     std::cout << " r1: " << road_map[building_one.path_one] << ", r2: " << road_map[building_one.path_two] << ", r3: " << road_map[building_one.path_three] <<std::endl;
     std::cout << " r1: " << road_map[building_two.path_one] << ", r2: " << road_map[building_two.path_two] << ", r3: " << road_map[building_two.path_three] <<std::endl;

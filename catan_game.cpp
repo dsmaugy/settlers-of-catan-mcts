@@ -1,27 +1,34 @@
 #include "catan_game.h"
-#include "catan_game_board.h"
-#include "catan_player.h"
+// #include "catan_game_board.h"
+// #include "catan_player.h"
 #include <unordered_set>
 #include <algorithm>
 #include <random>       // std::default_random_engine
 
-int VALUES[18] = {5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11};
+int VALUES[19] = {5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11,7}; // 7 isn't a valid reward amt, but is used to randomly assign the desert
+int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4};
 int seed = 12345;
 
 Game::Game(Player p1, Player p2) {
     // build all of the hexes, put into tiles
 
     std::shuffle(std::begin(VALUES), std::end(VALUES), std::default_random_engine(seed));
+    std::shuffle(std::begin(LAND), std::end(LAND), std::default_random_engine(seed));
 
-
-    int r1 = 0, r2 = 3;
+    int r1 = 0, r2 = 3, i = 0;
 
     for (int q = -3; q <= 3; q++) {
         for (int r = r1; r <= r2; r++) {
-            Hex h = Hex(q,r);
+            Hex h = Hex(q,r); // change constructor to assign type
             tiles.insert(h);
+            tile_rewards[h] = VALUES[i];
 
+            i++;
         }
+        if (q < 0)
+            r1--;
+        else
+            r2--;
     }
 }
 
