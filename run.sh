@@ -9,11 +9,11 @@
 #SBATCH --job-name=catan-out
 #SBATCH --output=%x-%j.out
 
-
-module load intel
+# comment me out if running locally
+# module load intel
 
 make clean
 make
 
-export OMP_NUM_THREADS=4
+export OMP_NUM_THREADS=20
 ./run_catan_agent.app

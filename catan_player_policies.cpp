@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <climits>
 #include <stack>
+#include <cmath>
+#include <omp.h>
 
 #include "catan_player_policies.h"
 #include "catan_game.h"
@@ -28,8 +30,11 @@ MCTSPolicy::MCTSPolicy(int limit, bool parallel) {
 }
 
 double MCTSPolicy::get_ucb_value(GameState *parent_state, GameState *child_state) {
-    // TODO
-    return 0;
+    MCTS_Edge edge = std::make_pair(*parent_state, *child_state);
+    double average_payoff = ((double) state_map.at(*child_state).first) / ((double) state_map.at(*child_state).second);  // use .at to ensure all dict values are init
+    double exploration_term = sqrt((2.0*log((double)state_map.at(*parent_state).second))/(double) edge_map.at(edge).second);
+    if (parent_state->current_turn == 1) exploration_term *= -1;  // reverse exploration for player 2
+    return average_payoff + exploration_term;
 }
 
 Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
@@ -37,7 +42,11 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
     RandomPolicy random_picker;
 
     if (is_parallel) {
-        // TODO
+        // TODO: implement
+        #pragma omp parallel
+        {
+            
+        }
     } else {
         // TODO: factor in dice roll
         GameState *current_state = state;
