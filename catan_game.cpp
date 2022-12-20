@@ -9,6 +9,9 @@ int VALUES[19] = {5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11,7}; // 7 isn't a vali
 int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4};
 int seed = 12345;
 
+std::unordered_set<Hex, HashHex> Game::tiles;
+std::unordered_map<Hex, int, HashHex> Game::tile_rewards;
+
 Game::Game(Player p1, Player p2) {
     // build all of the hexes, put into tiles
 

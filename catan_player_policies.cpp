@@ -38,12 +38,13 @@ double MCTSPolicy::get_ucb_value(GameState *parent_state, GameState *child_state
 }
 
 Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
-    Reward_Visit_Pair outcome = std::make_pair(0, 0);
+    int reward = 0;
+    int visit = 0;
     RandomPolicy random_picker;
-
+    
     if (is_parallel) {
         // TODO: implement
-        #pragma omp parallel
+        #pragma omp parallel default(none) reduction(+:reward) reduction(+:visit)
         {
             
         }
@@ -51,11 +52,11 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
         // TODO: factor in dice roll
         GameState *current_state = state;
         while (!current_state->is_game_over()) current_state = random_picker.get_best_move(current_state);
-        outcome.second = 1;
-        if (current_state->game_winner() == current_state->player_one) outcome.first = 1;
+        visit = 1;
+        if (current_state->game_winner() == current_state->player_one) reward = 1;
     }
 
-    return outcome;
+    return std::make_pair(reward, visit);
 }
 
 
