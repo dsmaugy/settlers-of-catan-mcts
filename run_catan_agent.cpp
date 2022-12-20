@@ -28,8 +28,7 @@ int main(int argc, char** argv) {
     HexPath road_four = HexPath(hex_one, hex_four);
     HexPath road_five = HexPath(hex_two, hex_four);
 
-    HexPath road_one_equivalent = HexPath(hex_two, hex_one);
-    PlayerPolicy policy = RandomPolicy();
+    // HexPath road_one_equivalent = HexPath(hex_two, hex_one);
     
 
     // std::unordered_map<Hex, int, HashHex> hex_map;
@@ -56,19 +55,23 @@ int main(int argc, char** argv) {
     std::cout << " r1: " << road_map[building_one.path_one] << ", r2: " << road_map[building_one.path_two] << ", r3: " << road_map[building_one.path_three] <<std::endl;
     std::cout << " r1: " << road_map[building_two.path_one] << ", r2: " << road_map[building_two.path_two] << ", r3: " << road_map[building_two.path_three] <<std::endl;
 
+
+    RandomPolicy policy = RandomPolicy();
+    Player p1 = Player(&policy);
+    std::cout << "Cities: " << p1.cities.size() << std::endl;
     // building_map[building_one] = 18;
     // building_map[building_two] = 17;
 
-
+    // Player *p1 = new Player();
     // std::cout << "Hex One val: " << hex_map[hex_one] << std::endl;
     // std::cout << "Road One: " << road_map[road_one] << " Road Two: " << road_map[road_two] << " Road Three: " << road_map[road_three] << std::endl;
     // std::cout << "Building One: " << building_map[building_one] << " Building Two: " << building_map[building_two] << std::endl;
     // std::cout << "Hex Path equivalence associativity: " << (road_one_equivalent == road_one) << std::endl;
     // omp_set_num_threads(4);
-    #pragma omp parallel
-    {
-        if (omp_get_thread_num() == 0) 
-        std::cout << "Running program with " << omp_get_num_threads() << " threads out of max " << omp_get_max_threads() << std::endl;
-    }
+    // #pragma omp parallel
+    // {
+    //     if (omp_get_thread_num() == 0) 
+    //     std::cout << "Running program with " << omp_get_num_threads() << " threads out of max " << omp_get_max_threads() << std::endl;
+    // }
     return 0;
 }

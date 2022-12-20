@@ -15,9 +15,9 @@ GameState *RandomPolicy::get_best_move(GameState *root_state) {
     std::vector<GameState*> possible_moves = root_state->get_all_moves();
     int rand_move_idx = std::rand() % possible_moves.size();
 
-    for (int i=0; i < possible_moves.size(); i++) {
-        if (i != rand_move_idx)
-            delete possible_moves.at(i);
+    // free all other moves
+    for (const auto& child_state: possible_moves) {
+        if (child_state != possible_moves.at(rand_move_idx)) delete child_state; // TODO: maybe want to verify if this actually works with print debug
     }
 
     return possible_moves.at(rand_move_idx);
@@ -55,7 +55,7 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
         visit = 1;
         if (current_state->game_winner() == current_state->player_one) reward = 1;
     }
-
+    
     return std::make_pair(reward, visit);
 }
 
@@ -63,7 +63,6 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
 GameState *MCTSPolicy::get_best_move(GameState *root_state) {
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    GameState *current_state = root_state;
 
     // update the tree for as much time as we can
     while (TIME_DIFF_MILLISECONDS(start, end) < train_time_limit_sec*1000) {
@@ -95,7 +94,6 @@ GameState *MCTSPolicy::get_best_move(GameState *root_state) {
 void MCTSPolicy::update_mcts(GameState *root_state) {
     std::stack<GameState*> explore_tree_path;
     GameState *current_state;
-    MCTS_Edge parent_child_edge;
     
     current_state = root_state;
     explore_tree_path.push(current_state);

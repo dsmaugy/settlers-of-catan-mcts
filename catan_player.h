@@ -18,7 +18,7 @@ class GameState;
 class Player {
 
     public:
-        PlayerPolicy player_policy;
+        PlayerPolicy *player_policy;
 
         std::unordered_set <HexPath, HashPath> roads;
         std::unordered_set <HexIntersection, HashIntersection> settlements;
@@ -26,6 +26,10 @@ class Player {
 
         int resource_cards [NUM_RESOURCES];
         int dev_cards [NUM_DEVELOPMENT_CARDS];
+
+        // constructor
+        Player(PlayerPolicy *policy);
+        Player() {};
 
         // Given the current game state, returns a move the player will make following its policy
         GameState *get_player_move(GameState *game_state);
