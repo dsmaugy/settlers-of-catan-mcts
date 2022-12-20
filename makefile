@@ -1,6 +1,6 @@
 CC = g++
 
-CFLAGS = -g -Wall --std="c++17"
+CFLAGS = -g -Wall --std="c++17" -fopenmp
 
 run_catan_agent.app: run_catan_agent.o catan_game.o catan_game_board.o # catan_player_policies.o
 	$(CC) -o $@ $(CFLAGS) $^

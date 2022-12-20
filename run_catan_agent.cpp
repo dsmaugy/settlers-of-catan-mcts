@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unordered_map>
+#include <omp.h>
 
 #include "catan_game.h"
 #include "catan_player_policies.h"
@@ -62,5 +63,11 @@ int main(int argc, char** argv) {
     // std::cout << "Road One: " << road_map[road_one] << " Road Two: " << road_map[road_two] << " Road Three: " << road_map[road_three] << std::endl;
     // std::cout << "Building One: " << building_map[building_one] << " Building Two: " << building_map[building_two] << std::endl;
     // std::cout << "Hex Path equivalence associativity: " << (road_one_equivalent == road_one) << std::endl;
+    omp_set_num_threads(4);
+    #pragma omp parallel
+    {
+        // if (omp_get_thread_num() == 0) 
+        std::cout << "Running program with " << omp_get_num_threads() << " threads." << std::endl;
+    }
     return 0;
 }
