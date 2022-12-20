@@ -10,6 +10,8 @@
 #SBATCH --output=%x-%j.out
 
 
+module load intel
+
 make clean
 make
 
