@@ -65,8 +65,8 @@ Game::Game(Player p1, Player p2) {
     }
 
     // instantiate the GameState, populate the hex list and map
-    // GameState::tiles = tiles;
-    // GameState::tile_rewards = tile_rewards;
+    GameState::tiles = tiles;
+    GameState::tile_rewards = tile_rewards;
 
     game_state = GameState(p1, p2, robber_pos, 1);
 }
@@ -119,13 +119,13 @@ GameState::GameState(Player p1, Player p2, Hex robber_pos, int turn) {
 
 bool GameState::is_game_over() {
     // TODO: ensure this is valid
-    return (player_one.points == 11) || (player_two.points == 11);
+    return (player_one.victory_points == 11) || (player_two.victory_points == 11);
     // return false;
 }
 
 Player GameState::game_winner() {
     // TODO: ensure this is valid
-    Player winner = (player_one.points == 11) ? player_one : player_two; 
+    Player winner = (player_one.victory_points == 11) ? player_one : player_two; 
     return winner;
 }
 
@@ -136,21 +136,7 @@ std::vector<GameState*> GameState::get_all_moves() {
     return all_moves;
 }
 
-bool GameState::operator==(const GameState& state) const {
-    // TODO: ensure this is valid
 
-    // check if both players are the same
-    if (player_one != state.player_one) return false;
-    if (player_two != state.player_two) return false;
-
-    // robber on the same position
-    if (robber_position != state.robber_position) return false;
-
-    // check turn
-    if (current_turn != state.current_turn) return false;
-
-    return true;
-}
 
 // GAME PLAYER DEFINITIONS
 
@@ -160,9 +146,11 @@ Player::Player(PlayerPolicy *policy) {
     // init resource cards and dev values
     for (int i = 0; i < NUM_DEVELOPMENT_CARDS; i++) dev_cards[i] = 0;
     for (int i = 0; i < NUM_RESOURCES; i++) resource_cards[i] = 0;
+
+    // init victory points
+    victory_points = 0;
 }
 
-// TODO: add points check here
 bool Player::operator==(const Player& player) const {
     // check all resources same
     for (int i=0; i < NUM_RESOURCES; i++) {
@@ -191,6 +179,25 @@ bool Player::operator==(const Player& player) const {
     for (const auto& city: cities) {
         if (!IS_IN_SET(player.cities, city)) return false;
     }
+
+    // check points count
+    if (victory_points != player.victory_points) return false;
+
+    return true;
+}
+
+bool GameState::operator==(const GameState& state) const {
+    // TODO: ensure this is valid
+
+    // check if both players are the same
+    if (!(player_one == state.player_one)) return false;
+    if (!(player_two == state.player_two)) return false;
+
+    // robber on the same position
+    if (!(robber_position == state.robber_position)) return false;
+
+    // check turn
+    if (!(current_turn == state.current_turn)) return false;
 
     return true;
 }
