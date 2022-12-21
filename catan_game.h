@@ -55,7 +55,7 @@ class GameState{
 class Game {
 
     public:
-        GameState game_state;
+        GameState *game_state;
 
         /* 
             Given a state, roll the dice and update resource values for each player
@@ -67,6 +67,12 @@ class Game {
         // constructor
         Game(Player p1, Player p2);
         Game() {};
+
+        /*
+            Goes to next turn of game following player policies.
+            Returns 1 if player one won, -1 if player 2 won, and 0 if the game has not ended.
+        */
+        int next_turn();
 };
 
 class HashGameState {

@@ -4,6 +4,7 @@
 #include <stack>
 #include <cmath>
 #include <omp.h>
+#include <iostream>
 
 #include "catan_player_policies.h"
 #include "catan_game.h"
@@ -41,6 +42,7 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
     int reward = 0;
     int visit = 0;
     RandomPolicy random_picker;
+    std::cout << "starting simulation" << std::endl;
     
     // TODO needs verification
     if (is_parallel) {
@@ -59,6 +61,7 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
         GameState *current_state = state;
         while (!current_state->is_game_over()) {
             current_state = random_picker.get_best_move(current_state);
+            std::cout << "Random State: " << current_state->player_one.resource_cards[2] << std::endl;
             if (!current_state->is_game_over())
                 Game::update_state_with_dice_roll(current_state);
         }
@@ -66,6 +69,7 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
         if (current_state->game_winner() == current_state->player_one) reward = 1;
     }
     
+    std::cout << "done simulation" << std::endl;
     return std::make_pair(reward, visit);
 }
 
@@ -74,12 +78,14 @@ GameState *MCTSPolicy::get_best_move(GameState *root_state) {
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
+    std::cout << "gonna start updating mcts" << std::endl;
     // update the tree for as much time as we can
     while (TIME_DIFF_MILLISECONDS(start, end) < train_time_limit_sec*1000) {
         update_mcts(root_state);
         end = std::chrono::steady_clock::now();
     }
 
+    std::cout << "done updating mcts, now returning best move" << std::endl;
     // from current state, find state with best reward averages
     std::vector<GameState*> possible_moves = root_state->get_all_moves();
     double max_average_value = __DBL_MIN__;
@@ -108,6 +114,7 @@ void MCTSPolicy::update_mcts(GameState *root_state) {
     current_state = root_state;
     explore_tree_path.push(current_state);
     bool encountered_leaf = false;
+    std::cout << "starting tree policy loop" << std::endl;
     while (!current_state->is_game_over() && !encountered_leaf) {
         std::vector<GameState*> possible_moves = current_state->get_all_moves();
         GameState* current_target_child_state;       // will hold best move to make
@@ -150,6 +157,7 @@ void MCTSPolicy::update_mcts(GameState *root_state) {
         Game::update_state_with_dice_roll(current_state);
     }
 
+    std::cout << "got out of tree policy loop" << std::endl;
     // at this point *current_state should hold the leaf node, we can start simulating from here
     Reward_Visit_Pair simulation_outcome = mcts_simulation(current_state);
 

@@ -37,7 +37,7 @@ Game::Game(Player p1, Player p2) {
     int val;
 
     Hex robber_pos;
-
+    
     for (int q = -3; q <= 3; q++) {
         for (int r = r1; r <= r2; r++) {
             // if out of bounds
@@ -47,14 +47,14 @@ Game::Game(Player p1, Player p2) {
 
             } else {
                 Hex h;
-        
+
                 if((val = VALUES[v++]) == 7){
                     h = Hex(q,r, -1);   // Desert tile
                     robber_pos = h;
                 } else {
                     h = Hex(q,r, LAND[l++]);
                 }
-                std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v=" << v*/ <<std::endl; 
+                // std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v=" << v*/ <<std::endl; 
                 tiles.insert(h);
                 tile_rewards[h] = val;
             }
@@ -65,9 +65,9 @@ Game::Game(Player p1, Player p2) {
             r2--;
     }
     //TODO: set the initial player settlements here? Figure out where it is that they'll go
-    
+    p1.settlements.insert()
     // instantiate the GameState, populate the hex list and map
-    game_state = GameState(p1, p2, robber_pos, 1);
+    game_state = new GameState(p1, p2, robber_pos, 1);
     GameState::tiles = tiles;
     GameState::tile_rewards = tile_rewards;
 }
@@ -174,6 +174,29 @@ void Game::update_state_with_dice_roll(GameState *state) {
     // std::cout << "hex: q=" << hex.q << ", r=" << hex.r << std::endl;
 }
 
+int Game::next_turn() {
+    if (game_state->is_game_over()) {
+        if (game_state->game_winner() == game_state->player_one) return 1;
+        else return -1;
+    }
+
+    // game not over yet
+    GameState *new_state;
+    if (game_state->current_turn == 0) {
+        std::cout << "Player 1 turn..." << std::endl;
+        new_state = game_state->player_one.get_player_move(game_state);
+    }
+    else {
+        std::cout << "Player 2 turn..." << std::endl;
+        new_state = game_state->player_two.get_player_move(game_state);
+    }
+
+    delete game_state;
+    game_state = new_state;
+
+    return 0;
+}
+
 
 // GAME STATE DEFINITIONS
 
@@ -209,8 +232,19 @@ std::vector<GameState*> GameState::get_all_moves() {
     //   - You can use ONE card
     
     int next_turn;
+    if (current_turn == 0) next_turn = 1;
+    else if (current_turn == 1) next_turn = 0;
 
-    if (player_one.resource_cards[2] > 2) {
+    Player new_p1, new_p2;
+    new_p1 = Player(&player_one);
+    new_p2 = Player(&player_two);
+
+    // add the "don't do anything" turn
+    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn));
+    
+    new_p1 = Player(&player_one);
+    new_p2 = Player(&player_two);
+    if (new_p1.resource_cards[2] > 2) {
         int rand1 = rand() % tiles.size();
         int rand2 = rand() % tiles.size();
         auto hex_it = tiles.begin();
@@ -227,8 +261,8 @@ std::vector<GameState*> GameState::get_all_moves() {
         Hex h2 = *hex_it;
 
         HexPath fake_road = HexPath(h1, h2);
-        player_one.roads.insert(fake_road);
-        player_one.resource_cards[2] -= 2;
+        new_p1.roads.insert(fake_road);
+        new_p1.resource_cards[2] -= 2;
     }
 
     // if (player_one.resource_cards[3] > 4) {
@@ -258,8 +292,8 @@ std::vector<GameState*> GameState::get_all_moves() {
         
     // }
 
-    player_one.victory_points = player_one.roads.size();
-
+    new_p1.victory_points = player_one.roads.size();
+    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn));
     
     return all_moves;
 }

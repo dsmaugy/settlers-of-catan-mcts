@@ -66,10 +66,15 @@ int main(int argc, char** argv) {
     p2 = Player(p2_policy);
     catan_game = Game(p1, p2);
 
-    Player p1_clone = Player(&p1);
-    // p1_clone.resource_cards[0] += 5;
-    std::cout << "p1 clone same?: " << (p1 == p1_clone) << std::endl;
+    int game_status = catan_game.next_turn();
+    while (game_status == 0)
+        catan_game.next_turn();
 
+    if (game_status == 1)
+        std::cout << "Game ended... Player 1 won!" << std::endl;
+    else
+        std::cout << "Game ended... Player 2 won!" << std::endl;
+   
     
     return 0;
 }
