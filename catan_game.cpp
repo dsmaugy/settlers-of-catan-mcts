@@ -37,7 +37,7 @@ Game::Game(Player p1, Player p2) {
     int val;
 
     Hex robber_pos;
-
+    
     for (int q = -3; q <= 3; q++) {
         for (int r = r1; r <= r2; r++) {
             // if out of bounds
@@ -51,7 +51,7 @@ Game::Game(Player p1, Player p2) {
                 } else {
                     h = Hex(q,r, LAND[l++]); // Resource tile
                 }
-                std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v=" << v*/ <<std::endl; 
+                // std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v=" << v*/ <<std::endl; 
                 tiles.insert(h);
                 tile_rewards[h] = val;
             }
@@ -93,7 +93,7 @@ Game::Game(Player p1, Player p2) {
     p2.road_sites.insert(HexPath(p2_a, p2_d));
 
     // instantiate the GameState, populate the hex list and map
-    game_state = GameState(p1, p2, robber_pos, 0); //start off with player 1
+    game_state = new GameState(p1, p2, robber_pos, 0); //start off with player 1
     GameState::tiles = tiles;
     GameState::tile_rewards = tile_rewards;
 }
@@ -187,6 +187,30 @@ void Game::update_state_with_dice_roll(GameState *state) {
     }
 }
 
+int Game::next_turn() {
+    if (game_state->is_game_over()) {
+        if (game_state->game_winner() == game_state->player_one) return 1;
+        else return -1;
+    }
+
+    // game not over yet
+    GameState *new_state;
+    if (game_state->current_turn == 0) {
+        std::cout << "Player 1 turn..." << std::endl;
+        new_state = game_state->player_one.get_player_move(game_state);
+    }
+    else {
+        std::cout << "Player 2 turn..." << std::endl;
+        new_state = game_state->player_two.get_player_move(game_state);
+    }
+
+    delete game_state;
+    game_state = new_state;
+
+    return 0;
+}
+
+
 // GAME STATE DEFINITIONS
 
 GameState::GameState(Player p1, Player p2, Hex robber_pos, int turn) {
@@ -198,7 +222,7 @@ GameState::GameState(Player p1, Player p2, Hex robber_pos, int turn) {
 
 // TODO: ensure that this works
 bool GameState::is_game_over() {
-    return (player_one.victory_points == 10) || (player_two.victory_points == 10);
+    return (player_one.victory_points >= 10) || (player_two.victory_points >= 10);
     // return false;
 }
 
@@ -208,7 +232,7 @@ Player GameState::game_winner() {
         std::cerr << "Tried to view winner of non-terminal game state" << std::endl;
         exit(1);
     }
-    Player winner = (player_one.victory_points == 10) ? player_one : player_two; 
+    Player winner = (player_one.victory_points >= 10) ? player_one : player_two; 
     return winner;
 }
 
@@ -240,6 +264,70 @@ std::vector<GameState*> GameState::get_all_moves() {
     // See all the things that you can build
     
     
+    int next_turn;
+    if (current_turn == 0) next_turn = 1;
+    else if (current_turn == 1) next_turn = 0;
+
+    Player new_p1, new_p2;
+    new_p1 = Player(&player_one);
+    new_p2 = Player(&player_two);
+
+    // add the "don't do anything" turn
+    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn));
+    
+    new_p1 = Player(&player_one);
+    new_p2 = Player(&player_two);
+    if (new_p1.resource_cards[2] > 2) {
+        int rand1 = rand() % tiles.size();
+        int rand2 = rand() % tiles.size();
+        auto hex_it = tiles.begin();
+        for (int i=0; i < rand1; i++) {
+            hex_it++;
+        }
+        Hex h1 = *hex_it;
+
+        hex_it = tiles.begin();
+        for (int i=0; i < rand2; i++) {
+            hex_it++;
+        }
+
+        Hex h2 = *hex_it;
+
+        HexPath fake_road = HexPath(h1, h2);
+        new_p1.roads.insert(fake_road);
+        new_p1.resource_cards[2] -= 2;
+    }
+
+    // if (player_one.resource_cards[3] > 4) {
+    //     if (player_one.roads.size() > 2) {
+    //         int rand1 = rand() % player_one.roads.size();
+    //         int rand2 = rand() % player_one.roads.size();
+    //         auto path_it = player_one.roads.begin();
+    //         for (int i=0; i < rand1; i++) {
+    //             path_it++;
+    //         }
+    //         HexPath path1 = *path_it;
+
+    //         auto hex_it = player_one.roads.begin();
+    //         for (int i=0; i < rand2; i++) {
+    //             path_it++;
+    //         }
+
+    //         HexPath path2 = *path_it;
+
+    //         HexIntersection fake_settlement = HexIntersection(path1, path2);
+    //         player_one.settlements.insert(fake_settlement);
+    //         player_one.resource_cards[3] -= 4;
+    //     }
+    // }
+
+    // if (player_one.settlements.size() > 2) {
+        
+    // }
+
+    new_p1.victory_points = player_one.roads.size();
+    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn));
+    
     return all_moves;
 }
 
@@ -257,6 +345,24 @@ Player::Player(PlayerPolicy *policy) {
     // init victory points, card count
     victory_points = 0;
     card_count = 0;
+}
+
+Player::Player(Player *player) {
+    // create a new player object from a pre-existing one
+
+    // copy int attributes
+    player_policy = player->player_policy;
+    card_count = player->card_count;
+    victory_points = player->victory_points;
+
+    // copy resources over
+    for (int i=0; i < NUM_RESOURCES; i++) resource_cards[i] = player->resource_cards[i];
+    for (int i=0; i < NUM_DEVELOPMENT_CARDS; i++) dev_cards[i] = player->dev_cards[i];
+
+    // copy roads/settlements/cities
+    for (const auto& road: player->roads) roads.insert(road);
+    for (const auto& settlement: player->settlements) settlements.insert(settlement);
+    for (const auto& city: player->cities) cities.insert(city);
 }
 
 bool Player::operator==(const Player& player) const {
