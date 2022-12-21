@@ -61,6 +61,7 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
         GameState *current_state = state;
         while (!current_state->is_game_over()) {
 <<<<<<< HEAD
+<<<<<<< HEAD
             // std::cout << "pre best";
             current_state = random_picker.get_best_move(current_state);
             // std::cout << "post best";
@@ -74,6 +75,12 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
                 Game::update_state_with_dice_roll(current_state);
             // std::cout << "post roll";
             // exit(0);
+=======
+            current_state = random_picker.get_best_move(current_state);
+            // std::cout << "P1 VP: " << current_state->player_one.victory_points << std::endl; 
+            if (!current_state->is_game_over())
+                Game::update_state_with_dice_roll(current_state);
+>>>>>>> 9557da1df20a3c7458a017ac3ede3cd780666251
 =======
             current_state = random_picker.get_best_move(current_state);
             // std::cout << "P1 VP: " << current_state->player_one.victory_points << std::endl; 
