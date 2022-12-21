@@ -27,7 +27,9 @@ class Player {
         int victory_points;
 
         std::unordered_set <HexPath, HashPath> roads;
+        std::unordered_set <HexPath, HashPath> road_sites;
         std::unordered_set <HexIntersection, HashIntersection> settlements;
+        std::unordered_set <HexIntersection, HashIntersection> settlement_sites;
         std::unordered_set <HexIntersection, HashIntersection> cities;
 
 

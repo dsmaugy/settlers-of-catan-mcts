@@ -21,7 +21,14 @@ int main(int argc, char** argv) {
     // GameState::tiles = unordered_set<Hex> tiles;
     // GameState::tile_rewards = unordered_map<Hex> tile_rewards;
 
-    Game game = Game(Player(), Player());
+    Player one = Player();
+    Player two = Player();
+
+    Game game = Game(one, two);
+
+    // std::cout << "Settlements here:" << game.game_state.player_one.settlements.size() << std::endl;
+    // std::cout << "Settlements here:" << game.game_state.player_two.settlements.size() << std::endl;
+
     Hex set_test = Hex(-2,0,2);
     Hex set_test2 = Hex(1,0,3);
     std::cout << "GameState set/map worked, since set_test has value " << GameState::tile_rewards[set_test] << std::endl;
