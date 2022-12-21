@@ -15,14 +15,8 @@ int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4}; //wheat, wood, wool, ore, 
 //TODO: Better seed?
 int seed = 12345;
 
-// GameState::unordered_set<Hex, HashHex> init_set(unordered_set<Hex,HashHex> tiles){
-//     GameState::tiles = tiles;
-// }
-
 std::unordered_set<Hex, HashHex> GameState::tiles;
 std::unordered_map<Hex, int, HashHex> GameState::tile_rewards;
-
-
 
 // Initialize the game board (Hexes), initial game state?
 Game::Game(Player p1, Player p2) {
@@ -82,15 +76,17 @@ Game::Game(Player p1, Player p2) {
     p1.road_sites.insert(HexPath(p1_b, p1_c));
     p1.road_sites.insert(HexPath(p1_a, p1_d));
     p1.road_sites.insert(HexPath(p1_b, p1_d));
+    p1.victory_points += 1;
 
     HexIntersection p2_starter = HexIntersection(HexPath(p2_a, p2_b),HexPath(p2_b, p2_c),HexPath(p2_a, p2_c));
     p2.settlements.insert(p2_starter);
-    p1.settlement_sites.insert(HexIntersection(HexPath(p1_a, p1_b), HexPath(p1_a, p1_c), HexPath(p1_b, p1_c)));
+    p2.settlement_sites.insert(HexIntersection(HexPath(p2_a, p2_b), HexPath(p2_a, p2_c), HexPath(p2_b, p2_c)));
     p2.roads.insert(HexPath(p2_a, p2_b));
     p2.road_sites.insert(HexPath(p2_b, p2_c));
     p2.road_sites.insert(HexPath(p2_a, p2_c));
     p2.road_sites.insert(HexPath(p2_b, p2_d));
     p2.road_sites.insert(HexPath(p2_a, p2_d));
+    p2.victory_points += 1;
 
     // instantiate the GameState, populate the hex list and map
     game_state = new GameState(p1, p2, robber_pos, 0); //start off with player 1
