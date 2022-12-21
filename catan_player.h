@@ -3,8 +3,6 @@
 //header file content
 #include <cstddef>
 #include <unordered_set>
-// #include "custom_hash.h"
-// #include "catan_player_policies.h"
 #include "policy.h"
 #include "catan_game_board.h"
 
@@ -33,6 +31,7 @@ class Player {
 
         // constructor
         Player(PlayerPolicy *policy);
+        Player(Player *player);
         Player() {};
 
         // Given the current game state, returns a move the player will make following its policy

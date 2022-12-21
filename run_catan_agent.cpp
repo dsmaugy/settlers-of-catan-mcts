@@ -9,29 +9,17 @@
 
 #include <chrono>
 
-#define TIME_DIFF_MILLISECONDS(start, end) (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count())
-
 const char *CMD_LINE_ERROR = "Invalid command line arguments. Usage: ./run_catan_agent <mcts-serial|mcts-parallel|random> <mcts-serial|mcts-parallel|random> <mcts time limit>";
 
 int main(int argc, char** argv) {
     std::cout << "hello world" << "df\n";
-
-    // args: p1_model p2_model time_limit num_games
-
-    // GameState::tiles = unordered_set<Hex> tiles;
-    // GameState::tile_rewards = unordered_map<Hex> tile_rewards;
-
-    Game game = Game(Player(), Player());
-    Hex set_test = Hex(-2,0,2);
-    Hex set_test2 = Hex(1,0,3);
-    std::cout << "GameState set/map worked, since set_test has value " << GameState::tile_rewards[set_test] << std::endl;
-    std::cout << "GameState set/map worked, since set_test2 has value " << GameState::tile_rewards[set_test2] << std::endl;
     
     // get command line args
     char *p1_policy_arg, *p2_policy_arg;
     float time_limit;
+    int num_games;
 
-    if (argc != 4) {
+    if (argc != 5) {
         std::cerr << CMD_LINE_ERROR << std::endl;
         exit(-1);
     }
@@ -43,6 +31,7 @@ int main(int argc, char** argv) {
     p1_policy_arg = argv[1];
     p2_policy_arg = argv[2];
     time_limit = atof(argv[3]);
+    num_games = atoi(argv[4]);
 
     if (strcmp(p1_policy_arg, "mcts-serial") == 0) {
         p1_policy = new MCTSPolicy(time_limit, false);
@@ -76,6 +65,11 @@ int main(int argc, char** argv) {
     p1 = Player(p1_policy);
     p2 = Player(p2_policy);
     catan_game = Game(p1, p2);
+
+    Player p1_clone = Player(&p1);
+    // p1_clone.resource_cards[0] += 5;
+    std::cout << "p1 clone same?: " << (p1 == p1_clone) << std::endl;
+
     
     return 0;
 }
