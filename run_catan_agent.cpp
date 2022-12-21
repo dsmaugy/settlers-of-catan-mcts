@@ -12,7 +12,6 @@
 const char *CMD_LINE_ERROR = "Invalid command line arguments. Usage: ./run_catan_agent <mcts-serial|mcts-parallel|random> <mcts-serial|mcts-parallel|random> <mcts time limit>";
 
 int main(int argc, char** argv) {
-    std::cout << "hello world" << "df\n";
 
     // get command line args
     char *p1_policy_arg, *p2_policy_arg;

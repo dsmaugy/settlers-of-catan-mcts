@@ -61,7 +61,7 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
         GameState *current_state = state;
         while (!current_state->is_game_over()) {
             current_state = random_picker.get_best_move(current_state);
-            // std::cout << "Random State: " << current_state->player_one.resource_cards[0] << std::endl;
+            std::cout << "P1 VP: " << current_state->player_one.resource_cards[0] << std::endl;
             if (!current_state->is_game_over())
                 Game::update_state_with_dice_roll(current_state);
             // exit(0);
