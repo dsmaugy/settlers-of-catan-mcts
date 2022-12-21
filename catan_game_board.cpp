@@ -21,6 +21,10 @@ bool Hex::operator==(const Hex& hex) const {
     return (q == hex.q && r == hex.r && land_type == hex.land_type);
 }
 
+bool Hex::operator!=(const Hex& hex) const {
+    return !(q == hex.q && r == hex.r && land_type == hex.land_type);
+}
+
 HexPath::HexPath(Hex h1, Hex h2) {
     if ((h1.r < h2.r) || (h1.r == h2.r && h1.q < h2.q)) {
         hex_one = h1;

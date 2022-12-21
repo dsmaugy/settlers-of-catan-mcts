@@ -18,20 +18,17 @@ int main(int argc, char** argv) {
     // GameState::tiles = unordered_set<Hex> tiles;
     // GameState::tile_rewards = unordered_map<Hex> tile_rewards;
 
-    Game g = Game(Player(), Player());
+    Game game = Game(Player(), Player());
     Hex set_test = Hex(-2,0,2);
     Hex set_test2 = Hex(1,0,3);
     std::cout << "GameState set/map worked, since set_test has value " << GameState::tile_rewards[set_test] << std::endl;
-    std::cout << "GameState set/map worked, since set_test2 has value " << GameState::tile_rewards[set_test2] << std::endl;
+    std::cout << "GameState set/map worked, since set_test2 has value " << GameState::tile_rewards[set_test2] << std::endl;    
 
 
-    
-
-
-    Hex hex_one = Hex(0, 0, 0);
-    Hex hex_two = Hex(1, -1, 0);
-    Hex hex_three = Hex(1, 0, 0);
-    Hex hex_four = Hex(0, -1, 0);
+    Hex hex_one = Hex(0, 0, 3);
+    Hex hex_two = Hex(1, -1, 4);
+    Hex hex_three = Hex(1, 0, 3);
+    Hex hex_four = Hex(0, -1, -1);
 
     HexPath road_one = HexPath(hex_one, hex_two);
     HexPath road_two = HexPath(hex_one, hex_three);
@@ -40,6 +37,7 @@ int main(int argc, char** argv) {
     HexPath road_five = HexPath(hex_two, hex_four);
 
     // HexPath road_one_equivalent = HexPath(hex_two, hex_one);
+
     
 
     // std::unordered_map<Hex, int, HashHex> hex_map;
@@ -63,6 +61,46 @@ int main(int argc, char** argv) {
     HexIntersection building_one = HexIntersection(road_one, road_two, road_three);
     HexIntersection building_two = HexIntersection(road_one, road_four, road_five);
 
+    Player p1 = Player();
+    Player p2 = Player();
+    p1.resource_cards[0] += 4;
+    p1.resource_cards[1] += 1;
+    p1.resource_cards[2] += 4;
+    p1.resource_cards[3] += 3;
+    p1.resource_cards[4] += 3;
+    p1.card_count += 15;
+    std::cout << "P1 resources: ";
+    for (int i = 0; i < NUM_RESOURCES; i++){
+        std::cout << "r[" << i << "] = " << p1.resource_cards[i] << ", ";
+    }
+    std::cout << std::endl;
+
+    std::cout << "P2 resources: ";
+    for (int i = 0; i < NUM_RESOURCES; i++){
+        std::cout << "r[" << i << "] = " << p2.resource_cards[i] << ", ";
+    }
+    std::cout << std::endl;
+    p1.cities.insert(building_one);
+    p2.cities.insert(building_two);
+    GameState g = GameState(p1, p2, hex_one, 1);
+    Game::update_state_with_dice_roll(&g);
+
+    std::cout << "P1 resources: ";
+    for (int i = 0; i < NUM_RESOURCES; i++){
+        std::cout << "r[" << i << "] = " << g.player_one.resource_cards[i] << ", ";
+    }
+    std::cout << std::endl;
+
+    std::cout << "P2 resources: ";
+    for (int i = 0; i < 5; i++){
+        std::cout << "r[" << i << "] = " << g.player_two.resource_cards[i] << ", ";
+    }
+    std::cout << std::endl;
+
+
+
+
+
     for(const auto& hex: building_one.adjacent){
         std::cout << "hex: q=" << hex.q << ", r=" << hex.r << std::endl;
     }
@@ -78,13 +116,13 @@ int main(int argc, char** argv) {
 
     RandomPolicy random_policy = RandomPolicy();
     MCTSPolicy mcts_policy = MCTSPolicy(5, true);
-    Player p1 = Player(&random_policy);
-    Player p2 = Player(&mcts_policy);
+    Player p3 = Player(&random_policy);
+    Player p4 = Player(&mcts_policy);
 
-    p2.cities.insert(building_one);
-    p1.cities.insert(building_one);
+    p3.cities.insert(building_one);
+    p4.cities.insert(building_one);
 
-    std::cout << "p1==p2?: " << (p1 == p2) << std::endl;
+    std::cout << "p3==p4?: " << (p3 == p4) << std::endl;
     // for (const auto& i : p1.resource_cards) {
     //     std::cout << i << std::endl;
     // }
