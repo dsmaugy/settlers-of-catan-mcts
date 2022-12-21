@@ -64,16 +64,21 @@ int main(int argc, char** argv) {
     
     p1 = Player(p1_policy);
     p2 = Player(p2_policy);
-    catan_game = Game(p1, p2);
+     
+    int p1_wins = 0;
+    for (int i=0; i < num_games; i++) {
+        catan_game = Game(p1, p2);
+        int game_status = catan_game.next_turn();
+        while (game_status == 0)
+            catan_game.next_turn();
 
-    int game_status = catan_game.next_turn();
-    while (game_status == 0)
-        catan_game.next_turn();
+        if (game_status == 1)
+            std::cout << "Game ended... Player 1 won!" << std::endl;
+        else
+            std::cout << "Game ended... Player 2 won!" << std::endl;
+    }
 
-    if (game_status == 1)
-        std::cout << "Game ended... Player 1 won!" << std::endl;
-    else
-        std::cout << "Game ended... Player 2 won!" << std::endl;
+    std::cout << "P1 Winning Pct: " << (double)p1_wins/(double)num_games << std::endl; 
    
     
     return 0;
