@@ -18,11 +18,11 @@ Hex::Hex(int q_coord, int r_coord, int lt) {
 }
 
 bool Hex::operator==(const Hex& hex) const {
-    return (q == hex.q && r == hex.r && land_type == hex.land_type);
+    return (q == hex.q && r == hex.r);// land_type == hex.land_type
 }
 
 bool Hex::operator!=(const Hex& hex) const {
-    return !(q == hex.q && r == hex.r && land_type == hex.land_type);
+    return !(q == hex.q && r == hex.r);// land_type == hex.land_type
 }
 
 HexPath::HexPath(Hex h1, Hex h2) {

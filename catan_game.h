@@ -25,12 +25,6 @@ class GameState{
         static std::unordered_set<Hex, HashHex> tiles;
         static std::unordered_map<Hex, int, HashHex> tile_rewards;
 
-        // Initialize the tiles unordered set
-        // static unordered_set<Hex, HashHex> init_set();
-        
-        // Initialize the tile_rewards unordered map
-        // static unordered_set<Hex, int, HashHex> init_map();
-
         // Return true if game is over, false otherwise
         bool is_game_over();
 
@@ -48,9 +42,6 @@ class GameState{
         bool operator==(const GameState& state) const;
 
 };
-
-// GameState::std::unordered_set<Hex, HashHex> tiles = {};
-// GameState::std::unordered_map<Hex, int, HashHex> tile_rewards = {};
 
 class Game {
 

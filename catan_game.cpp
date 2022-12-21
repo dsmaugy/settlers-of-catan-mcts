@@ -15,14 +15,8 @@ int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4}; //wheat, wood, wool, ore, 
 //TODO: Better seed?
 int seed = 12345;
 
-// GameState::unordered_set<Hex, HashHex> init_set(unordered_set<Hex,HashHex> tiles){
-//     GameState::tiles = tiles;
-// }
-
 std::unordered_set<Hex, HashHex> GameState::tiles;
 std::unordered_map<Hex, int, HashHex> GameState::tile_rewards;
-
-
 
 // Initialize the game board (Hexes), initial game state?
 Game::Game(Player p1, Player p2) {
@@ -43,16 +37,13 @@ Game::Game(Player p1, Player p2) {
             // if out of bounds
             if (abs(q) == 3 || abs(r) == 3 || abs(-q-r) == 3) {
                 tiles.insert(Hex(q,r, -1));
-                // std::cout << "Hex at (" << q << "," << r << ") has land value " << -1 << " and reward value -----" <<std::endl; 
-
             } else {
                 Hex h;
-
                 if((val = VALUES[v++]) == 7){
                     h = Hex(q,r, -1);   // Desert tile
                     robber_pos = h;
                 } else {
-                    h = Hex(q,r, LAND[l++]);
+                    h = Hex(q,r, LAND[l++]); // Resource tile
                 }
                 // std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v=" << v*/ <<std::endl; 
                 tiles.insert(h);
@@ -64,10 +55,41 @@ Game::Game(Player p1, Player p2) {
         else 
             r2--;
     }
-    //TODO: set the initial player settlements here? Figure out where it is that they'll go
-    p1.settlements.insert()
+    //Initialize the player's starter structures, and look-ahead lists for roads and settlements
+    Hex p1_a, p1_b, p1_c, p1_d, p2_a, p2_b, p2_c, p2_d;
+    for (auto const &h: tiles) {
+        if(h.q == -1 && h.r == -1) p1_a = h; 
+        if(h.q == -2 && h.r == -1) p1_b = h; 
+        if(h.q == -2 && h.r == -2) p1_c = h; 
+        if(h.q == -1 && h.r == 0) p1_d = h; 
+        if(h.q == 1 && h.r == -1) p2_a = h; 
+        if(h.q == 2 && h.r == -1) p2_b = h; 
+        if(h.q == 2 && h.r == -2) p2_c = h; 
+        if(h.q == 1 && h.r == 0) p2_d = h; 
+    }
+
+    HexIntersection p1_starter = HexIntersection(HexPath(p1_a, p1_b),HexPath(p1_b, p1_c),HexPath(p1_a, p1_c));
+    p1.settlements.insert(p1_starter);
+    p1.settlement_sites.insert(HexIntersection(HexPath(p1_a, p1_b), HexPath(p1_a, p1_c), HexPath(p1_b, p1_c)));
+    p1.roads.insert(HexPath(p1_a, p1_b));
+    p1.road_sites.insert(HexPath(p1_a, p1_c));
+    p1.road_sites.insert(HexPath(p1_b, p1_c));
+    p1.road_sites.insert(HexPath(p1_a, p1_d));
+    p1.road_sites.insert(HexPath(p1_b, p1_d));
+    p1.victory_points += 1;
+
+    HexIntersection p2_starter = HexIntersection(HexPath(p2_a, p2_b),HexPath(p2_b, p2_c),HexPath(p2_a, p2_c));
+    p2.settlements.insert(p2_starter);
+    p2.settlement_sites.insert(HexIntersection(HexPath(p2_a, p2_b), HexPath(p2_a, p2_c), HexPath(p2_b, p2_c)));
+    p2.roads.insert(HexPath(p2_a, p2_b));
+    p2.road_sites.insert(HexPath(p2_b, p2_c));
+    p2.road_sites.insert(HexPath(p2_a, p2_c));
+    p2.road_sites.insert(HexPath(p2_b, p2_d));
+    p2.road_sites.insert(HexPath(p2_a, p2_d));
+    p2.victory_points += 1;
+
     // instantiate the GameState, populate the hex list and map
-    game_state = new GameState(p1, p2, robber_pos, 1);
+    game_state = new GameState(p1, p2, robber_pos, 0); //start off with player 1
     GameState::tiles = tiles;
     GameState::tile_rewards = tile_rewards;
 }
@@ -81,22 +103,19 @@ void Game::update_state_with_dice_roll(GameState *state) {
     // roll dice
     //TODO: Better rice rolling algorithm? currently starting w 7
     int dice = roll(1,6) + roll(1,6);
-    // std::cout << "Dice roll: " << dice << std::endl;
 
+
+    // if card counts > 7, randomly take half of the resources
     if (dice == 7){
-        state->move_robber = true;
+        // state->move_robber = true;  //move the robber
         int removed_cards, resource;
-        // if card counts > 7, randomly take half of the resources
         // remove from p1
         if (state->player_one.card_count > 7) {
-            // std::cout << "ok" <<std::endl;
             removed_cards = state->player_one.card_count/2;
             while (removed_cards > 0) {
                 // TODO: This also seems a little biased to [0-2]
                 resource = roll(0,4); // pick a random kind of card to remove
-                // std::cout << "resource=" << resource << std::endl;
                 if (state->player_one.resource_cards[resource] > 0) {
-                    // std::cout << "removed" << std::endl;
                     state->player_one.resource_cards[resource]--;
                     state->player_one.card_count--;
                     removed_cards--;
@@ -121,9 +140,7 @@ void Game::update_state_with_dice_roll(GameState *state) {
         // p1 update settlements
         for(const auto& settlement: state->player_one.settlements)
             for (const auto& hex: settlement.adjacent){
-                // std::cout << "hex: " << hex.q << hex.r << hex.land_type;
                 if (GameState::tile_rewards[hex] == dice) {
-                    // std::cout << "state->player_one hit!" << std::endl;
                     if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
                         state->player_one.resource_cards[land_type] += 1;
                         state->player_one.card_count += 1;
@@ -131,26 +148,21 @@ void Game::update_state_with_dice_roll(GameState *state) {
                 }
             }
 
-        // state->player_one update cities
+        // p1 update cities
         for(const auto& city: state->player_one.cities)
             for (const auto& hex: city.adjacent){
                 if (GameState::tile_rewards[hex] == dice) {
-                    // std::cout << "state->player_one city hit!" << std::endl;
                     if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
-                        // std::cout << "state->player_one city valid!" << std::endl;
-                        // std::cout << "state->player_one resource r["<< land_type << "]=" <<state->player_one.resource_cards[land_type];
                         state->player_one.resource_cards[land_type] += 2;
-                        // std::cout << "state->player_one resource r["<< land_type << "]=" <<state->player_one.resource_cards[land_type];
                         state->player_one.card_count += 2;
                     }
                 }
             }
 
-        // state->player_two update settlements
+        // p2 update settlements
         for(const auto& settlement: state->player_two.settlements)
             for (const auto& hex: settlement.adjacent){
                 if (GameState::tile_rewards[hex] == dice) {
-                    // std::cout << "state->player_two hit!" << std::endl;
                     if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
                         state->player_two.resource_cards[land_type] += 1;
                         state->player_two.card_count += 1;
@@ -158,20 +170,17 @@ void Game::update_state_with_dice_roll(GameState *state) {
                 }
             }
 
-        // state->player_two update cities
+        // p2 update cities
         for(const auto& city: state->player_two.cities)
             for (const auto& hex: city.adjacent){
                 if (GameState::tile_rewards[hex] == dice) {
-                    // std::cout << "state->player_two city hit!" << std::endl;
                     if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
-                        // std::cout << "state->player_two city valid!" << std:xx/:endl;
                         state->player_two.resource_cards[land_type] += 2;
                         state->player_two.card_count += 2;
                     }
                 }
             }
     }
-    // std::cout << "hex: q=" << hex.q << ", r=" << hex.r << std::endl;
 }
 
 int Game::next_turn() {
@@ -227,9 +236,29 @@ std::vector<GameState*> GameState::get_all_moves() {
     // TODO: 
     std::vector<GameState*> all_moves;
 
+    // // Move the robber
+    //     std::unordered_set<Hex, HashHex> new_robber_hexes;
+    //     Player victim;
+    //     if (state->current_turn == 0) {
+    //         victim = state->player_two;
+    //     } else {
+    //         victim = state->player_one;
+    //     }
+
+    //     // get all of the potential locations
+    //     for(const auto& settlement: victim.settlements)
+    //         for(const auto& hex: settlement.adjacent)
+    //             new_robber_hexes.insert(hex);
+    //     for(const auto& city: victim.cities)
+    //         for(const auto& hex: city.adjacent)
+    //             new_robber_hexes.insert(hex);
+
     // Implementation restrictions: 
     //   - You can build ONE thing
     //   - You can use ONE card
+
+    // See all the things that you can build
+    
     
     int next_turn;
     if (current_turn == 0) next_turn = 1;

@@ -13,6 +13,24 @@ const char *CMD_LINE_ERROR = "Invalid command line arguments. Usage: ./run_catan
 
 int main(int argc, char** argv) {
     std::cout << "hello world" << "df\n";
+
+    // // args: p1_model p2_model time_limit num_games
+
+    // // GameState::tiles = unordered_set<Hex> tiles;
+    // // GameState::tile_rewards = unordered_map<Hex> tile_rewards;
+
+    // Player one = Player();
+    // Player two = Player();
+
+    // Game game = Game(one, two);
+
+    // // std::cout << "Settlements here:" << game.game_state.player_one.settlements.size() << std::endl;
+    // // std::cout << "Settlements here:" << game.game_state.player_two.settlements.size() << std::endl;
+
+    // Hex set_test = Hex(-2,0,2);
+    // Hex set_test2 = Hex(1,0,3);
+    // std::cout << "GameState set/map worked, since set_test has value " << GameState::tile_rewards[set_test] << std::endl;
+    // std::cout << "GameState set/map worked, since set_test2 has value " << GameState::tile_rewards[set_test2] << std::endl;
     
     // get command line args
     char *p1_policy_arg, *p2_policy_arg;
