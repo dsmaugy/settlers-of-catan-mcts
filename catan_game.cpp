@@ -109,6 +109,17 @@ void Game::update_state_with_dice_roll(GameState *state) {
     if (dice == 7){
         state->move_robber = true;  //move the robber
         int removed_cards, resource;
+
+        // update the p1 and p2 card counts
+        int p1_cards = 0, p2_cards = 0;
+        for (int i=0; i < NUM_RESOURCES; i++) {
+            p1_cards += state->player_one.resource_cards[i];
+            p2_cards += state->player_two.resource_cards[i];
+        }
+
+        state->player_one.card_count = p1_cards;
+        state->player_two.card_count = p2_cards;
+
         // remove from p1
         if (state->player_one.card_count > 7) {
             removed_cards = state->player_one.card_count/2;
