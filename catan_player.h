@@ -20,16 +20,16 @@ class Player {
     public:
         PlayerPolicy *player_policy;
 
-        std::unordered_set <HexPath, HashPath> roads;
-        std::unordered_set <HexIntersection, HashIntersection> settlements;
-        std::unordered_set <HexIntersection, HashIntersection> cities;
-
         int resource_cards [NUM_RESOURCES];
         int dev_cards [NUM_DEVELOPMENT_CARDS];
 
         int card_count;
-
         int victory_points;
+
+        std::unordered_set <HexPath, HashPath> roads;
+        std::unordered_set <HexIntersection, HashIntersection> settlements;
+        std::unordered_set <HexIntersection, HashIntersection> cities;
+
 
         // constructor
         Player(PlayerPolicy *policy);

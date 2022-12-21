@@ -11,8 +11,9 @@
 
 int VALUES[19] = {5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11,7}; // 7 isn't a valid reward amt, but is used to randomly assign the desert
 int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4}; //wheat, wood, wool, ore, brick (-1 = nothing/desert)
-int seed = 12345;
 
+//TODO: Better seed?
+int seed = 12345;
 
 // GameState::unordered_set<Hex, HashHex> init_set(unordered_set<Hex,HashHex> tiles){
 //     GameState::tiles = tiles;
@@ -20,6 +21,7 @@ int seed = 12345;
 
 std::unordered_set<Hex, HashHex> GameState::tiles;
 std::unordered_map<Hex, int, HashHex> GameState::tile_rewards;
+
 
 
 // Initialize the game board (Hexes), initial game state?
@@ -52,7 +54,7 @@ Game::Game(Player p1, Player p2) {
                 } else {
                     h = Hex(q,r, LAND[l++]);
                 }
-                // std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v=" << v*/ <<std::endl; 
+                std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v=" << v*/ <<std::endl; 
                 tiles.insert(h);
                 tile_rewards[h] = val;
             }
@@ -62,6 +64,8 @@ Game::Game(Player p1, Player p2) {
         else 
             r2--;
     }
+    //TODO: set the initial player settlements here? Figure out where it is that they'll go
+    
     // instantiate the GameState, populate the hex list and map
     game_state = GameState(p1, p2, robber_pos, 1);
     GameState::tiles = tiles;
@@ -73,37 +77,40 @@ int roll(int min, int max) {
     return rand() % (min - max + 1) + min;
 }
 
-//TODO: ensure that this works
 void Game::update_state_with_dice_roll(GameState *state) {
     // roll dice
+    //TODO: Better rice rolling algorithm? currently starting w 7
     int dice = roll(1,6) + roll(1,6);
+    // std::cout << "Dice roll: " << dice << std::endl;
 
-    Player p1 = state->player_one;
-    Player p2 = state->player_two;
     if (dice == 7){
         state->move_robber = true;
         int removed_cards, resource;
         // if card counts > 7, randomly take half of the resources
         // remove from p1
-        if (p1.card_count > 7) {
-            removed_cards = p1.card_count/2;
+        if (state->player_one.card_count > 7) {
+            // std::cout << "ok" <<std::endl;
+            removed_cards = state->player_one.card_count/2;
             while (removed_cards > 0) {
+                // TODO: This also seems a little biased to [0-2]
                 resource = roll(0,4); // pick a random kind of card to remove
-                if (p1.resource_cards[resource] > 0) {
-                    p1.resource_cards[resource]--;
-                    p1.card_count--;
+                // std::cout << "resource=" << resource << std::endl;
+                if (state->player_one.resource_cards[resource] > 0) {
+                    // std::cout << "removed" << std::endl;
+                    state->player_one.resource_cards[resource]--;
+                    state->player_one.card_count--;
                     removed_cards--;
                 }
             }
         }
         //remove from p2
-        if (p2.card_count > 7) {
-            removed_cards = p2.card_count/2;
+        if (state->player_two.card_count > 7) {
+            removed_cards = state->player_two.card_count/2;
             while (removed_cards > 0) {
                 resource = roll(0,4); // pick a random kind of card to remove
-                if (p2.resource_cards[resource] > 0) {
-                    p2.resource_cards[resource]--;
-                    p2.card_count--;
+                if (state->player_two.resource_cards[resource] > 0) {
+                    state->player_two.resource_cards[resource]--;
+                    state->player_two.card_count--;
                     removed_cards--;
                 }
             }
@@ -112,45 +119,54 @@ void Game::update_state_with_dice_roll(GameState *state) {
     } else {
         int land_type;
         // p1 update settlements
-        for(const auto& settlement: p1.settlements)
+        for(const auto& settlement: state->player_one.settlements)
             for (const auto& hex: settlement.adjacent){
+                // std::cout << "hex: " << hex.q << hex.r << hex.land_type;
                 if (GameState::tile_rewards[hex] == dice) {
-                    if ((land_type = hex.land_type) != -1) {
-                        p1.resource_cards[land_type] += 1;
-                        p1.card_count += 1;
+                    // std::cout << "state->player_one hit!" << std::endl;
+                    if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
+                        state->player_one.resource_cards[land_type] += 1;
+                        state->player_one.card_count += 1;
                     }
                 }
             }
 
-        // p1 update cities
-        for(const auto& city: p1.cities)
+        // state->player_one update cities
+        for(const auto& city: state->player_one.cities)
             for (const auto& hex: city.adjacent){
                 if (GameState::tile_rewards[hex] == dice) {
-                    if ((land_type = hex.land_type) != -1) {
-                        p1.resource_cards[land_type] += 2;
-                        p1.card_count += 2;
+                    // std::cout << "state->player_one city hit!" << std::endl;
+                    if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
+                        // std::cout << "state->player_one city valid!" << std::endl;
+                        // std::cout << "state->player_one resource r["<< land_type << "]=" <<state->player_one.resource_cards[land_type];
+                        state->player_one.resource_cards[land_type] += 2;
+                        // std::cout << "state->player_one resource r["<< land_type << "]=" <<state->player_one.resource_cards[land_type];
+                        state->player_one.card_count += 2;
                     }
                 }
             }
 
-        // p2 update settlements
-        for(const auto& settlement: p2.settlements)
+        // state->player_two update settlements
+        for(const auto& settlement: state->player_two.settlements)
             for (const auto& hex: settlement.adjacent){
                 if (GameState::tile_rewards[hex] == dice) {
-                    if ((land_type = hex.land_type) != -1) {
-                        p2.resource_cards[land_type] += 1;
-                        p2.card_count += 1;
+                    // std::cout << "state->player_two hit!" << std::endl;
+                    if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
+                        state->player_two.resource_cards[land_type] += 1;
+                        state->player_two.card_count += 1;
                     }
                 }
             }
 
-        // p2 update cities
-        for(const auto& city: p1.cities)
+        // state->player_two update cities
+        for(const auto& city: state->player_two.cities)
             for (const auto& hex: city.adjacent){
                 if (GameState::tile_rewards[hex] == dice) {
-                    if ((land_type = hex.land_type) != -1) {
-                        p1.resource_cards[land_type] += 2;
-                        p2.card_count += 2;
+                    // std::cout << "state->player_two city hit!" << std::endl;
+                    if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
+                        // std::cout << "state->player_two city valid!" << std:xx/:endl;
+                        state->player_two.resource_cards[land_type] += 2;
+                        state->player_two.card_count += 2;
                     }
                 }
             }
@@ -187,6 +203,10 @@ Player GameState::game_winner() {
 std::vector<GameState*> GameState::get_all_moves() {
     // TODO: 
     std::vector<GameState*> all_moves;
+
+    // Implementation restrictions: 
+    //   - You can build ONE thing
+    //   - You can use ONE card
     
     return all_moves;
 }

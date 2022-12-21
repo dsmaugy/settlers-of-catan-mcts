@@ -15,6 +15,7 @@ class Hex {
         Hex() {};
         Hex(int q, int r, int land_type);
         bool operator==(const Hex& hex) const;
+        bool operator!=(const Hex& hex) const;
 };
 
 class HexPath {
