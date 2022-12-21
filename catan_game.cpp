@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <random>       // std::default_random_engine
 
-// #include <iostream>
+#include <iostream>
 
 #define IS_IN_SET(set, elem) (set.find(elem) != set.end())
 
@@ -73,34 +73,88 @@ int roll(int min, int max) {
     return rand() % (min - max + 1) + min;
 }
 
+//TODO: ensure that this works
 void Game::update_state_with_dice_roll(GameState *state) {
     // roll dice
     int dice = roll(1,6) + roll(1,6);
-    
-    //TODO: what if its a 7?
 
     Player p1 = state->player_one;
     Player p2 = state->player_two;
-    int land_type;
-
-    // p1 update
-    for(const auto& settlement: p1.settlements){
-        for (const auto& hex: settlement.adjacent){
-            if (GameState::tile_rewards[hex] == dice) {
-                if ((land_type = hex.land_type) != -1) p1.resource_cards[land_type] += 1;
+    if (dice == 7){
+        state->move_robber = true;
+        int removed_cards, resource;
+        // if card counts > 7, randomly take half of the resources
+        // remove from p1
+        if (p1.card_count > 7) {
+            removed_cards = p1.card_count/2;
+            while (removed_cards > 0) {
+                resource = roll(0,4); // pick a random kind of card to remove
+                if (p1.resource_cards[resource] > 0) {
+                    p1.resource_cards[resource]--;
+                    p1.card_count--;
+                    removed_cards--;
+                }
             }
         }
-    }
-
-    // p2 update
-    for(const auto& settlement: p2.settlements){
-        for (const auto& hex: settlement.adjacent){
-            if (GameState::tile_rewards[hex] == dice) {
-                if ((land_type = hex.land_type) != -1) p2.resource_cards[land_type] += 1;
+        //remove from p2
+        if (p2.card_count > 7) {
+            removed_cards = p2.card_count/2;
+            while (removed_cards > 0) {
+                resource = roll(0,4); // pick a random kind of card to remove
+                if (p2.resource_cards[resource] > 0) {
+                    p2.resource_cards[resource]--;
+                    p2.card_count--;
+                    removed_cards--;
+                }
             }
         }
+
+    } else {
+        int land_type;
+        // p1 update settlements
+        for(const auto& settlement: p1.settlements)
+            for (const auto& hex: settlement.adjacent){
+                if (GameState::tile_rewards[hex] == dice) {
+                    if ((land_type = hex.land_type) != -1) {
+                        p1.resource_cards[land_type] += 1;
+                        p1.card_count += 1;
+                    }
+                }
+            }
+
+        // p1 update cities
+        for(const auto& city: p1.cities)
+            for (const auto& hex: city.adjacent){
+                if (GameState::tile_rewards[hex] == dice) {
+                    if ((land_type = hex.land_type) != -1) {
+                        p1.resource_cards[land_type] += 2;
+                        p1.card_count += 2;
+                    }
+                }
+            }
+
+        // p2 update settlements
+        for(const auto& settlement: p2.settlements)
+            for (const auto& hex: settlement.adjacent){
+                if (GameState::tile_rewards[hex] == dice) {
+                    if ((land_type = hex.land_type) != -1) {
+                        p2.resource_cards[land_type] += 1;
+                        p2.card_count += 1;
+                    }
+                }
+            }
+
+        // p2 update cities
+        for(const auto& city: p1.cities)
+            for (const auto& hex: city.adjacent){
+                if (GameState::tile_rewards[hex] == dice) {
+                    if ((land_type = hex.land_type) != -1) {
+                        p1.resource_cards[land_type] += 2;
+                        p2.card_count += 2;
+                    }
+                }
+            }
     }
-    
     // std::cout << "hex: q=" << hex.q << ", r=" << hex.r << std::endl;
 }
 
@@ -114,15 +168,15 @@ GameState::GameState(Player p1, Player p2, Hex robber_pos, int turn) {
     current_turn = turn;
 }
 
+// TODO: ensure that this works
 bool GameState::is_game_over() {
-    // TODO: ensure this is valid
-    return (player_one.victory_points == 11) || (player_two.victory_points == 11);
+    return (player_one.victory_points == 10) || (player_two.victory_points == 10);
     // return false;
 }
 
+// TODO: ensure that this works
 Player GameState::game_winner() {
-    // TODO: ensure this is valid
-    Player winner = (player_one.victory_points == 11) ? player_one : player_two; 
+    Player winner = (player_one.victory_points == 10) ? player_one : player_two; 
     return winner;
 }
 
@@ -144,8 +198,9 @@ Player::Player(PlayerPolicy *policy) {
     for (int i = 0; i < NUM_DEVELOPMENT_CARDS; i++) dev_cards[i] = 0;
     for (int i = 0; i < NUM_RESOURCES; i++) resource_cards[i] = 0;
 
-    // init victory points
+    // init victory points, card count
     victory_points = 0;
+    card_count = 0;
 }
 
 bool Player::operator==(const Player& player) const {
@@ -183,8 +238,8 @@ bool Player::operator==(const Player& player) const {
     return true;
 }
 
+// TODO: ensure that this works
 bool GameState::operator==(const GameState& state) const {
-    // TODO: ensure this is valid
 
     // check if both players are the same
     if (!(player_one == state.player_one)) return false;

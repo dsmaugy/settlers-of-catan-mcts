@@ -20,6 +20,8 @@ class GameState{
 
         int current_turn;
 
+        bool move_robber;
+
         static std::unordered_set<Hex, HashHex> tiles;
         static std::unordered_map<Hex, int, HashHex> tile_rewards;
 
