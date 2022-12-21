@@ -20,8 +20,10 @@ make
 echo ""
 
 export OMP_NUM_THREADS=4
-echo "Running with 4 threads"
+echo "Running with 4 threads against RANDOM"
 ./run_catan_agent.app mcts-parallel random 0.2
+./run_catan_agent.app mcts-parallel random 0.4
+./run_catan_agent.app mcts-parallel random 0.6
 
 echo ""
 
