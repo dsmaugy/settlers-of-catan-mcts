@@ -6,6 +6,7 @@
 #include <random>       // std::default_random_engine
 
 #include <iostream>
+#include <cstdio>
 
 #define IS_IN_SET(set, elem) (set.find(elem) != set.end())
 
@@ -89,22 +90,21 @@ Game::Game(Player p1, Player p2) {
     p2.victory_points += 1;
 
     // instantiate the GameState, populate the hex list and map
-    game_state = new GameState(p1, p2, robber_pos, 0); //start off with player 1
+    game_state = new GameState(p1, p2, robber_pos, 0, 1); //start off with player 1
     GameState::tiles = tiles;
     GameState::tile_rewards = tile_rewards;
 }
 
 // random int in range [min,max]
 int roll(int min, int max) {
-    return rand() % (min - max + 1) + min;
+    return (rand() % (max - min + 1)) + min;
 }
 
 void Game::update_state_with_dice_roll(GameState *state) {
     // roll dice
     //TODO: Better rice rolling algorithm? currently starting w 7
     int dice = roll(1,6) + roll(1,6);
-
-
+    // std::cout << "in dice roll" << std::endl;
     // if card counts > 7, randomly take half of the resources
     if (dice == 7){
         state->move_robber = true;  //move the robber
@@ -144,6 +144,7 @@ void Game::update_state_with_dice_roll(GameState *state) {
                     if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
                         state->player_one.resource_cards[land_type] += 1;
                         state->player_one.card_count += 1;
+                        // std::cout << "updating resources at hex: (" << hex.q <<", "<< hex.r << ") with resource " << land_type << std::endl;
                     }
                 }
             }
@@ -181,6 +182,7 @@ void Game::update_state_with_dice_roll(GameState *state) {
                 }
             }
     }
+
 }
 
 int Game::next_turn() {
@@ -190,6 +192,10 @@ int Game::next_turn() {
     }
 
     // game not over yet
+
+    // roll die
+    update_state_with_dice_roll(game_state);
+
     GameState *new_state;
     if (game_state->current_turn == 0) {
         std::cout << "Player 1 turn..." << std::endl;
@@ -203,17 +209,24 @@ int Game::next_turn() {
     delete game_state;
     game_state = new_state;
 
+    std::cout << "REAL P1 RESOURCES: " << game_state->player_one.resource_cards[0] << std::endl;
+    std::cout << "REAL P1 VP: " << game_state->player_one.victory_points << std::endl;
+
+    std::cout << "REAL P2 RESOURCES: " << game_state->player_two.resource_cards[0] << std::endl;
+    std::cout << "REAL P2 VP: " << game_state->player_two.victory_points << std::endl;
+
     return 0;
 }
 
 
 // GAME STATE DEFINITIONS
 
-GameState::GameState(Player p1, Player p2, Hex robber_pos, int turn) {
+GameState::GameState(Player p1, Player p2, Hex robber_pos, int player_turn, int starting_turn_number) {
     player_one = p1;
     player_two = p2;
     robber_position = robber_pos;
-    current_turn = turn;
+    current_turn = player_turn;
+    turn_number = starting_turn_number;
 }
 
 // TODO: ensure that this works
@@ -233,7 +246,6 @@ Player GameState::game_winner() {
 }
 
 std::vector<GameState*> GameState::get_all_moves() {
-    // TODO: 
     std::vector<GameState*> all_moves;
     std::unordered_set<Hex, HashHex> new_robber_hexes;
     
@@ -246,7 +258,7 @@ std::vector<GameState*> GameState::get_all_moves() {
     new_p2 = Player(&player_two);
 
     // add the "don't do anything" turn
-    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn));
+    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
     
     // Move the robber
     if(move_robber){
@@ -321,9 +333,9 @@ std::vector<GameState*> GameState::get_all_moves() {
                 playing.road_sites.erase(road);
                 // built road along with wherever the robber is being moved, if we are moving it
                 if (move_robber) {
-                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn));
+                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
                 }else {
-                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn));
+                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
                 }
 
                 // undo all of that.
@@ -358,9 +370,9 @@ std::vector<GameState*> GameState::get_all_moves() {
                 playing.settlements.insert(site);
                 playing.victory_points += 1;
                 if (move_robber) {
-                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn));
+                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
                 }else {
-                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn));
+                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
                 }
                 playing.settlement_sites.insert(site);
                 playing.settlements.erase(site);
@@ -385,9 +397,9 @@ std::vector<GameState*> GameState::get_all_moves() {
                 playing.cities.insert(settlement);
                 playing.victory_points += 1;
                 if (move_robber) {
-                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn));
+                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
                 }else {
-                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn));
+                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
                 }
                 playing.settlements.insert(settlement);
                 playing.cities.erase(settlement);
@@ -409,9 +421,9 @@ std::vector<GameState*> GameState::get_all_moves() {
             // "buy" the dev card
             playing.victory_points += 1;
             if (move_robber) {
-                for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn));
+                for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
             }else {
-                all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn));
+                all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
             }
             playing.resource_cards[0] += 1;
             playing.resource_cards[2] += 1;
@@ -503,6 +515,9 @@ bool GameState::operator==(const GameState& state) const {
 
     // check turn
     if (!(current_turn == state.current_turn)) return false;
+    
+    // TODO: check turn number maybe this is not needed?
+    if (turn_number != state.turn_number) return false;
 
     return true;
 }
