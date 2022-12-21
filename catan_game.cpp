@@ -301,6 +301,8 @@ std::vector<GameState*> GameState::get_all_moves() {
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
 
+    std::cout << "Getting all the moves! ";
+
     // add the "don't do anything" turn
     all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
 
@@ -327,6 +329,8 @@ std::vector<GameState*> GameState::get_all_moves() {
             playing.resource_cards[resource] += 4;
         }
     }
+
+    std::cout << " got all the trade moves,";
     
     // Move the robber
     if(move_robber){
@@ -344,6 +348,8 @@ std::vector<GameState*> GameState::get_all_moves() {
             for(const auto& hex: city.adjacent)
                 new_robber_hexes.insert(hex);
     }
+
+    std::cout << " indexed all the robber moves,";
     
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
@@ -394,13 +400,13 @@ std::vector<GameState*> GameState::get_all_moves() {
 
                 // check that the road isn't already yours. Ensure that it won't be out of bounds. Try to add.
                 if (abs(h3.q) <= 3 && abs(h3.r <=3)) {
-                    if ((playing.roads.find(HexPath(h1,h3)) != playing.roads.end()) && (abs(h1.q) <= 3 && abs(h1.r <=3))) t1 = playing.road_sites.insert(HexPath(h1,h3)).second;
-                    if ((playing.roads.find(HexPath(h2,h3)) != playing.roads.end()) && (abs(h2.q) <= 3 && abs(h2.r <=3))) t2 = playing.road_sites.insert(HexPath(h2,h3)).second;
+                    if ((playing.roads.find(HexPath(h1,h3)) != playing.roads.end())) t1 = playing.road_sites.insert(HexPath(h1,h3)).second;
+                    if ((playing.roads.find(HexPath(h2,h3)) != playing.roads.end())) t2 = playing.road_sites.insert(HexPath(h2,h3)).second;
                     s1 = playing.settlement_sites.insert(HexIntersection(HexPath(h1,h2), HexPath(h2,h3), HexPath(h1,h3))).second;
                 }
                 if (abs(h4.q) <= 3 && abs(h4.r <=3)){
-                    if ((playing.roads.find(HexPath(h1,h4)) != playing.roads.end()) && (abs(h1.q) <= 3 && abs(h1.r <=3))) t3 = playing.road_sites.insert(HexPath(h1,h4)).second;
-                    if ((playing.roads.find(HexPath(h2,h4)) != playing.roads.end()) && (abs(h2.q) <= 3 && abs(h2.r <=3))) t4 = playing.road_sites.insert(HexPath(h2,h4)).second;
+                    if ((playing.roads.find(HexPath(h1,h4)) != playing.roads.end())) t3 = playing.road_sites.insert(HexPath(h1,h4)).second;
+                    if ((playing.roads.find(HexPath(h2,h4)) != playing.roads.end())) t4 = playing.road_sites.insert(HexPath(h2,h4)).second;
                     s2 = playing.settlement_sites.insert(HexIntersection(HexPath(h1,h2), HexPath(h1,h4), HexPath(h2,h4))).second;
 
                 }
@@ -419,7 +425,6 @@ std::vector<GameState*> GameState::get_all_moves() {
                 playing.roads.erase(road);
                 playing.road_sites.insert(road);
 
-                // playing
                 if (t1) playing.road_sites.erase(HexPath(h1,h3));
                 if (t2) playing.road_sites.erase(HexPath(h2,h3));
                 if (t3) playing.road_sites.erase(HexPath(h1,h4));
@@ -432,6 +437,8 @@ std::vector<GameState*> GameState::get_all_moves() {
             playing.card_count += 4;
         }
     }
+
+    std::cout << " got all the road moves,";
 
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
@@ -465,6 +472,8 @@ std::vector<GameState*> GameState::get_all_moves() {
         }
     }
 
+    std::cout << " got all the settlement moves,";
+
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
     playing = (current_turn == 0) ? new_p1 : new_p2;
@@ -492,6 +501,8 @@ std::vector<GameState*> GameState::get_all_moves() {
         }
     }
 
+    std::cout << " got all the city moves,";
+
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
     playing = (current_turn == 0) ? new_p1 : new_p2;
@@ -514,6 +525,8 @@ std::vector<GameState*> GameState::get_all_moves() {
             playing.resource_cards[3] += 1;
             playing.card_count += 3;
     }
+
+    std::cout << " got all the card moves. All done!" << std::endl;
 
     return all_moves;
 }
