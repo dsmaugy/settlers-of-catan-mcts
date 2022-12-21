@@ -14,7 +14,7 @@ int VALUES[19] = {5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11,7}; // 7 isn't a vali
 int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4}; //wheat, wood, wool, ore, brick (-1 = nothing/desert)
 
 //TODO: Better seed?
-int seed = 12345;
+int seed = 23445;
 
 std::unordered_set<Hex, HashHex> GameState::tiles;
 std::unordered_map<Hex, int, HashHex> GameState::tile_rewards;
@@ -268,6 +268,7 @@ std::vector<GameState*> GameState::get_all_moves() {
     for(int resource = 0; resource < 5; resource++){
         if (playing.resource_cards[resource] >= 4) {
             playing.resource_cards[resource] -= 4;
+            playing.card_count -= 3;
             for (int i = 0; i < 5; i++) {
                 if(i == resource) continue;
                 playing.resource_cards[i] += 1;
@@ -277,7 +278,9 @@ std::vector<GameState*> GameState::get_all_moves() {
                     std::cout << "I can cash in resource num=" << resource << std::endl;
                     all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
                 }
+                playing.resource_cards[i] -= 1;
             }
+                playing.card_count += 3;
             playing.resource_cards[resource] += 4;
         }
     }
@@ -307,6 +310,7 @@ std::vector<GameState*> GameState::get_all_moves() {
         if(playing.road_sites.size() != 0) {
             playing.resource_cards[1] -= 2;
             playing.resource_cards[4] -= 2;
+            playing.card_count -= 4;
             for (auto& road: playing.road_sites) {
                 Hex h1 = road.hex_one;
                 Hex h2 = road.hex_two;
@@ -374,6 +378,7 @@ std::vector<GameState*> GameState::get_all_moves() {
             }
             playing.resource_cards[1] += 2;
             playing.resource_cards[4] += 2;
+            playing.card_count += 4;
         }
     }
 
@@ -387,6 +392,7 @@ std::vector<GameState*> GameState::get_all_moves() {
             playing.resource_cards[1] -= 1;
             playing.resource_cards[2] -= 1;
             playing.resource_cards[4] -= 1;
+            playing.card_count -= 4;
             for (auto& site: playing.settlement_sites) {
                 playing.settlement_sites.erase(site);
                 playing.settlements.insert(site);
@@ -403,6 +409,7 @@ std::vector<GameState*> GameState::get_all_moves() {
             playing.resource_cards[1] += 1;
             playing.resource_cards[2] += 1;
             playing.resource_cards[4] += 1;
+            playing.card_count += 4;
         }
     }
 
@@ -414,6 +421,7 @@ std::vector<GameState*> GameState::get_all_moves() {
         if(playing.settlement_sites.size() != 0) {
             playing.resource_cards[0] -= 2;
             playing.resource_cards[3] -= 3;
+            playing.card_count -= 5;
             for (auto& settlement: playing.settlements) {
                 playing.settlements.erase(settlement);
                 playing.cities.insert(settlement);
@@ -428,6 +436,7 @@ std::vector<GameState*> GameState::get_all_moves() {
             }
             playing.resource_cards[0] += 2;
             playing.resource_cards[3] += 3;
+            playing.card_count += 5;
         }
     }
 
@@ -439,6 +448,7 @@ std::vector<GameState*> GameState::get_all_moves() {
             playing.resource_cards[0] -= 1;
             playing.resource_cards[2] -= 1;
             playing.resource_cards[3] -= 1;
+            playing.card_count -= 3;
             
             // "buy" the dev card
             playing.victory_points += 1;
@@ -450,6 +460,7 @@ std::vector<GameState*> GameState::get_all_moves() {
             playing.resource_cards[0] += 1;
             playing.resource_cards[2] += 1;
             playing.resource_cards[3] += 1;
+            playing.card_count += 3;
     }
 
     return all_moves;
@@ -520,6 +531,9 @@ bool Player::operator==(const Player& player) const {
 
     // check points count
     if (victory_points != player.victory_points) return false;
+    
+    // check card count
+    if (card_count != player.card_count) return false;
 
     return true;
 }
