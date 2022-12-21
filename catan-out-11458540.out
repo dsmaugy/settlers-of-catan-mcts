@@ -1,0 +1,80 @@
+rm -f *.app *.o
+g++  -g -Wall -fopenmp --std="c++17"   -c -o catan_game_board.o catan_game_board.cpp
+g++  -g -Wall -fopenmp --std="c++17"   -c -o catan_game.o catan_game.cpp
+g++  -g -Wall -fopenmp --std="c++17"   -c -o run_catan_agent.o run_catan_agent.cpp
+g++  -g -Wall -fopenmp --std="c++17"   -c -o catan_player_policies.o catan_player_policies.cpp
+g++ -o run_catan_agent.app -g -Wall -fopenmp --std="c++17"  catan_game_board.o catan_game.o run_catan_agent.o catan_player_policies.o
+Running with mcts-serial random 0.2
+Game ended... Player 1 won!
+P1 VP: 20
+P2 VP: 13
+
+Running with 4 threads against RANDOM
+Running with mcts-parallel random 0.2
+Game ended... Player 1 won!
+P1 VP: 20
+P2 VP: 14
+Running with mcts-parallel random 0.4
+Game ended... Player 1 won!
+P1 VP: 20
+P2 VP: 8
+Running with mcts-parallel random 0.6
+Game ended... Player 1 won!
+P1 VP: 20
+P2 VP: 4
+
+Running with 4 threads
+Running with mcts-serial mcts-parallel 0.2
+Game ended... Player 2 won!
+P1 VP: 17
+P2 VP: 20
+Running with mcts-serial mcts-parallel 0.4
+Game ended... Player 2 won!
+P1 VP: 17
+P2 VP: 20
+Running with mcts-serial mcts-parallel 0.6
+Game ended... Player 2 won!
+P1 VP: 17
+P2 VP: 20
+
+Running with 6 Threads
+Running with mcts-serial mcts-parallel 0.2
+Game ended... Player 2 won!
+P1 VP: 16
+P2 VP: 20
+Running with mcts-serial mcts-parallel 0.4
+Game ended... Player 2 won!
+P1 VP: 14
+P2 VP: 20
+Running with mcts-serial mcts-parallel 0.6
+Game ended... Player 1 won!
+P1 VP: 20
+P2 VP: 16
+
+Running with 8 Threads
+Running with mcts-serial mcts-parallel 0.2
+Game ended... Player 2 won!
+P1 VP: 12
+P2 VP: 20
+Running with mcts-serial mcts-parallel 0.4
+Game ended... Player 2 won!
+P1 VP: 14
+P2 VP: 20
+Running with mcts-serial mcts-parallel 0.6
+Game ended... Player 2 won!
+P1 VP: 19
+P2 VP: 20
+
+Running with 20 Threads
+Running with mcts-serial mcts-parallel 0.2
+Game ended... Player 2 won!
+P1 VP: 11
+P2 VP: 20
+Running with mcts-serial mcts-parallel 0.4
+Game ended... Player 2 won!
+P1 VP: 13
+P2 VP: 20
+Running with mcts-serial mcts-parallel 0.6
+Game ended... Player 2 won!
+P1 VP: 15
+P2 VP: 20
