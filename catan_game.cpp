@@ -13,7 +13,7 @@
 int VALUES[19] = {5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11,7}; // 7 isn't a valid reward amt, but is used to randomly assign the desert
 int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4}; //wheat, wood, wool, ore, brick (-1 = nothing/desert)
 
-//TODO: Better seed?
+
 int seed = 23445;
 
 std::unordered_set<Hex, HashHex> GameState::tiles;
@@ -46,7 +46,6 @@ Game::Game(Player p1, Player p2) {
                 } else {
                     h = Hex(q,r, LAND[l++]); // Resource tile
                 }
-                // std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v= << v*/ <<std::endl; 
                 tiles.insert(h);
                 tile_rewards[h] = val;
             }
@@ -56,51 +55,23 @@ Game::Game(Player p1, Player p2) {
         else 
             r2--;
     }
-    // std::cout << "--------------" << std::endl;
     //Initialize the player's starter structures, and look-ahead lists for roads and settlements
     Hex p1_a, p1_b, p1_c, p1_d, p2_a, p2_b, p2_c, p2_d;
     for (auto const &h: tiles) {
-        if(h.q == -1 && h.r == 1) {
-            p1_a = h; 
-            // std::cout << "1aland type=" << p1_a.land_type << std::endl;
-        }
-        if(h.q == -2 && h.r == 1) {
-            p1_b = h; 
-            // std::cout << "1bland type=" << p1_b.land_type << std::endl;
-        }
-        if(h.q == -2 && h.r == 2) {
-            p1_c = h; 
-            // std::cout << "1cland type=" << p1_c.land_type << std::endl;
-        }
-        if(h.q == -1 && h.r == 0) {
-            p1_d = h; 
-            // std::cout << "1dland type=" << p1_d.land_type << std::endl;
-        }
-        if(h.q == 1 && h.r == -1) {
-            p2_a = h; 
-            // std::cout << "2aland type=" << p2_a.land_type << std::endl;
-        }
-        if(h.q == 2 && h.r == -1) {
-            p2_b = h; 
-            // std::cout << "2bland type=" << p2_b.land_type << std::endl;
-        }
-        if(h.q == 2 && h.r == -2) {
-            p2_c = h; 
-            // std::cout << "2cland type=" << p2_c.land_type << std::endl;
-        }
-        if(h.q == 1 && h.r == 0) {
-            p2_d = h; 
-            // std::cout << "2dland type=" << p2_d.land_type << std::endl;
-        }
+        if(h.q == -1 && h.r == 1) p1_a = h; 
+        if(h.q == -2 && h.r == 1) p1_b = h; 
+        if(h.q == -2 && h.r == 2) p1_c = h; 
+        if(h.q == -1 && h.r == 0) p1_d = h; 
+        if(h.q == 1 && h.r == -1) p2_a = h; 
+        if(h.q == 2 && h.r == -1) p2_b = h; 
+        if(h.q == 2 && h.r == -2) p2_c = h; 
+        if(h.q == 1 && h.r == 0)  p2_d = h; 
     }
-    // bool b1;
 
     HexIntersection p1_starter = HexIntersection(HexPath(p1_a, p1_b),HexPath(p1_b, p1_c),HexPath(p1_a, p1_c));
     p1.settlements.insert(p1_starter);
     p1.settlement_sites.insert(HexIntersection(HexPath(p1_a, p1_b), HexPath(p1_a, p1_d), HexPath(p1_b, p1_d)));
-    
-    // std::cout << "list size p1:" << p1.settlement_sites.size();
-    // std::cout << "insert status: " << b1 <<std::endl;
+
     
     p1.roads.insert(HexPath(p1_a, p1_b));
     p1.road_sites.insert(HexPath(p1_a, p1_c));
@@ -132,9 +103,8 @@ int roll(int min, int max) {
 
 void Game::update_state_with_dice_roll(GameState *state) {
     // roll dice
-    //TODO: Better rice rolling algorithm? currently starting w 7
     int dice = roll(1,6) + roll(1,6);
-    // std::cout << "in dice roll" << std::endl;
+
     // if card counts > 7, randomly take half of the resources
     if (dice == 7){
         state->move_robber = true;  //move the robber
@@ -154,7 +124,6 @@ void Game::update_state_with_dice_roll(GameState *state) {
         if (state->player_one.card_count > 7) {
             removed_cards = state->player_one.card_count/2;
             while (removed_cards > 0) {
-                // TODO: This also seems a little biased to [0-2]
                 resource = roll(0,4); // pick a random kind of card to remove
                 if (state->player_one.resource_cards[resource] > 0) {
                     state->player_one.resource_cards[resource]--;
@@ -183,10 +152,8 @@ void Game::update_state_with_dice_roll(GameState *state) {
             for (const auto& hex: settlement.adjacent){
                 if (GameState::tile_rewards[hex] == dice) {
                     if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
-                        // std::cout << "cashout! die roll=" << dice << ", resource =" << land_type << std::endl; 
                         state->player_one.resource_cards[land_type] += 1;
                         state->player_one.card_count += 1;
-                        // std::cout << "updating resources at hex: (" << hex.q <<", "<< hex.r << ") with resource " << land_type << std::endl;
                     }
                 }
             }
@@ -240,20 +207,15 @@ int Game::next_turn() {
 
     GameState *new_state;
     if (game_state->current_turn == 0) {
-        // std::cout << "Player 1 turn..." << std::endl;
         new_state = game_state->player_one.get_player_move(game_state);
     }
     else {
-        // std::cout << "Player 2 turn..." << std::endl;
         new_state = game_state->player_two.get_player_move(game_state);
     }
 
     delete game_state;
     game_state = new_state;
 
-    // std::cout << "P2 POLICY ADDR: " << game_state->player_two.get_player_move << std::endl;
-    // std::cout << "REAL P1 VP: " << game_state->player_one.victory_points << std::endl;
-    // std::cout << "REAL P2 VP: " << game_state->player_two.victory_points << std::endl;
 
     return 0;
 }
@@ -267,8 +229,6 @@ GameState::GameState(Player p1, Player p2, Hex robber_pos, int player_turn, int 
     robber_position = robber_pos;
     current_turn = player_turn;
     turn_number = starting_turn_number;
-    // std::cout << "list size p1:" << p1.settlement_sites.size() <<std::endl;
-    // std::cout << "list size player_one:" << player_one.settlement_sites.size() << std::endl;
 }
 
 bool GameState::is_game_over() {
@@ -406,7 +366,6 @@ bool Player::operator==(const Player& player) const {
     return true;
 }
 
-// TODO: ensure that this works
 bool GameState::operator==(const GameState& state) const {
 
     // check if both players are the same
@@ -419,7 +378,6 @@ bool GameState::operator==(const GameState& state) const {
     // check turn
     if (!(current_turn == state.current_turn)) return false;
     
-    // TODO: check turn number maybe this is not needed?
     if (turn_number != state.turn_number) return false;
 
     return true;

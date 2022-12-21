@@ -8,8 +8,6 @@ enum Axis {
 };
 
 Hex::Hex(int q_coord, int r_coord, int lt) {
-    // if (abs(q_coord) > 2 || abs(r_coord) > 2)
-        // throw std::invalid_argument("Hex coords out of Catan range.");
 
     q = q_coord;
     r = r_coord;
@@ -72,7 +70,6 @@ HexIntersection::HexIntersection(HexPath h1, HexPath h2, HexPath h3) {
     std::array<HexPath, 3> paths = {h1, h2, h3};
     std::sort(paths.begin(), paths.end());
 
-    // std::cout << "r1: " << paths[0].axis << ", r2: " << paths[1].axis << ", r3: " << paths[2].axis << std::endl;
     path_one = paths[0];
     path_two = paths[1];
     path_three = paths[2];

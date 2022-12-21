@@ -45,7 +45,6 @@ Game::Game(Player p1, Player p2) {
                 } else {
                     h = Hex(q,r, LAND[l++]); // Resource tile
                 }
-                // std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v= << v*/ <<std::endl; 
                 tiles.insert(h);
                 tile_rewards[h] = val;
             }
@@ -204,20 +203,15 @@ int Game::next_turn() {
 
     GameState *new_state;
     if (game_state->current_turn == 0) {
-        // std::cout << "Player 1 turn..." << std::endl;
         new_state = game_state->player_one.get_player_move(game_state);
     }
     else {
-        // std::cout << "Player 2 turn..." << std::endl;
         new_state = game_state->player_two.get_player_move(game_state);
     }
 
     delete game_state;
     game_state = new_state;
 
-    // std::cout << "P2 POLICY ADDR: " << game_state->player_two.get_player_move << std::endl;
-    // std::cout << "REAL P1 VP: " << game_state->player_one.victory_points << std::endl;
-    // std::cout << "REAL P2 VP: " << game_state->player_two.victory_points << std::endl;
 
     return 0;
 }
