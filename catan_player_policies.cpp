@@ -42,9 +42,8 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
     int reward = 0;
     int visit = 0;
     RandomPolicy random_picker;
-    std::cout << "starting simulation" << std::endl;
+    // std::cout << "starting simulation" << std::endl;
     
-    // TODO needs verification
     if (is_parallel) {
         #pragma omp parallel default(none) firstprivate(random_picker, state) reduction(+:reward) reduction(+:visit)
         {
@@ -56,32 +55,41 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
             }
             visit = 1;
             if (current_state->game_winner() == current_state->player_one) reward = 1;
+            else reward = -1;
         }
     } else {
         GameState *current_state = state;
         while (!current_state->is_game_over()) {
-            std::cout << "pre best";
+<<<<<<< HEAD
+            // std::cout << "pre best";
             current_state = random_picker.get_best_move(current_state);
-            std::cout << "post best";
+            // std::cout << "post best";
             std::cout << "P1 VP: "; 
             for(int i = 0; i < 5; i++) {
                 std::cout << current_state->player_one.resource_cards[i];
             }
-            std::cout << "pre roll";
+            std::cout << std::endl;
+            // std::cout << "pre roll";
             if (!current_state->is_game_over())
                 Game::update_state_with_dice_roll(current_state);
-            std::cout << "post roll";
-            std::cout << std::endl;
+            // std::cout << "post roll";
             // exit(0);
+=======
+            current_state = random_picker.get_best_move(current_state);
+            // std::cout << "P1 VP: " << current_state->player_one.victory_points << std::endl; 
+            if (!current_state->is_game_over())
+                Game::update_state_with_dice_roll(current_state);
+>>>>>>> 9557da1df20a3c7458a017ac3ede3cd780666251
 
         }
-        std::cout << "done!!!!" << std::endl;
+        // std::cout << "done!!!!" << std::endl;
         visit = 1;
         if (current_state->game_winner() == current_state->player_one) reward = 1;
         else reward = -1;
     }
     
-    std::cout << "done simulation" << std::endl;
+    // if (is_parallel)
+        // std::cout << "simulation out: (" << reward << ", " << visit << ")" << std::endl;
     return std::make_pair(reward, visit);
 }
 
@@ -90,7 +98,7 @@ GameState *MCTSPolicy::get_best_move(GameState *root_state) {
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
-    std::cout << "gonna start updating mcts" << std::endl;
+    // std::cout << "gonna start updating mcts" << std::endl;
     // update the tree for as much time as we can
     while (TIME_DIFF_MILLISECONDS(start, end) < train_time_limit_sec*1000) {
         update_mcts(root_state);
@@ -98,7 +106,7 @@ GameState *MCTSPolicy::get_best_move(GameState *root_state) {
         // std::cout << "TIME: " << TIME_DIFF_MILLISECONDS(start, end) << " / " << train_time_limit_sec*1000 << std::endl;
     }
 
-    std::cout << "done updating mcts, now returning best move" << std::endl;
+    // std::cout << "done updating mcts, now returning best move for player " << root_state->current_turn << std::endl;
     // from current state, find state with best reward averages
     std::vector<GameState*> possible_moves = root_state->get_all_moves();
     double best_average_value;
@@ -110,17 +118,20 @@ GameState *MCTSPolicy::get_best_move(GameState *root_state) {
 
     GameState *best_state;
 
+    // int best_child_index = 0, child_index = 0;
     for (const auto& child_state : possible_moves) {
         double child_average = ((double) state_map[*child_state].first) / state_map[*child_state].second;
-        std::cout << "Reward: " << state_map[*child_state].first << " Visit: " << state_map[*child_state].second << std::endl;
+        // std::cout << "Reward: " << state_map[*child_state].first << " Visit: " << state_map[*child_state].second << std::endl;
         if ((root_state->current_turn == 0 && child_average > best_average_value) ||
             (root_state->current_turn == 1 && child_average < best_average_value)) {
             best_average_value = child_average;
             best_state = child_state;
+            // best_child_index = child_index;
         }
+        // child_index++;
     }
-    if (root_state->current_turn == 0)
-        std::cout << "BEST STATE # roads: " << best_state->player_one.roads.size() << " val: " << best_average_value << std::endl;
+    // if (root_state->current_turn == 0)
+    //     std::cout << "BEST STATE index: " << best_child_index << " val: " << best_average_value << std::endl;
 
     // free other states
     for (const auto& child_state : possible_moves) {

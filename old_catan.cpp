@@ -13,7 +13,6 @@
 int VALUES[19] = {5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11,7}; // 7 isn't a valid reward amt, but is used to randomly assign the desert
 int LAND[18] = {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,4,4,4}; //wheat, wood, wool, ore, brick (-1 = nothing/desert)
 
-//TODO: Better seed?
 int seed = 23445;
 
 std::unordered_set<Hex, HashHex> GameState::tiles;
@@ -56,52 +55,22 @@ Game::Game(Player p1, Player p2) {
         else 
             r2--;
     }
-    // std::cout << "--------------" << std::endl;
     //Initialize the player's starter structures, and look-ahead lists for roads and settlements
     Hex p1_a, p1_b, p1_c, p1_d, p2_a, p2_b, p2_c, p2_d;
     for (auto const &h: tiles) {
-        if(h.q == -1 && h.r == 1) {
-            p1_a = h; 
-            // std::cout << "1aland type=" << p1_a.land_type << std::endl;
-        }
-        if(h.q == -2 && h.r == 1) {
-            p1_b = h; 
-            // std::cout << "1bland type=" << p1_b.land_type << std::endl;
-        }
-        if(h.q == -2 && h.r == 2) {
-            p1_c = h; 
-            // std::cout << "1cland type=" << p1_c.land_type << std::endl;
-        }
-        if(h.q == -1 && h.r == 0) {
-            p1_d = h; 
-            // std::cout << "1dland type=" << p1_d.land_type << std::endl;
-        }
-        if(h.q == 1 && h.r == -1) {
-            p2_a = h; 
-            // std::cout << "2aland type=" << p2_a.land_type << std::endl;
-        }
-        if(h.q == 2 && h.r == -1) {
-            p2_b = h; 
-            // std::cout << "2bland type=" << p2_b.land_type << std::endl;
-        }
-        if(h.q == 2 && h.r == -2) {
-            p2_c = h; 
-            // std::cout << "2cland type=" << p2_c.land_type << std::endl;
-        }
-        if(h.q == 1 && h.r == 0) {
-            p2_d = h; 
-            // std::cout << "2dland type=" << p2_d.land_type << std::endl;
-        }
+        if(h.q == -1 && h.r == 1) p1_a = h; 
+        if(h.q == -2 && h.r == 1) p1_b = h; 
+        if(h.q == -2 && h.r == 2) p1_c = h; 
+        if(h.q == -1 && h.r == 0) p1_d = h; 
+        if(h.q == 1 && h.r == -1) p2_a = h; 
+        if(h.q == 2 && h.r == -1) p2_b = h; 
+        if(h.q == 2 && h.r == -2) p2_c = h; 
+        if(h.q == 1 && h.r == 0)  p2_d = h; 
     }
-    // bool b1;
 
     HexIntersection p1_starter = HexIntersection(HexPath(p1_a, p1_b),HexPath(p1_b, p1_c),HexPath(p1_a, p1_c));
     p1.settlements.insert(p1_starter);
     p1.settlement_sites.insert(HexIntersection(HexPath(p1_a, p1_b), HexPath(p1_a, p1_d), HexPath(p1_b, p1_d)));
-    
-    // std::cout << "list size p1:" << p1.settlement_sites.size();
-    // std::cout << "insert status: " << b1 <<std::endl;
-    
     p1.roads.insert(HexPath(p1_a, p1_b));
     p1.road_sites.insert(HexPath(p1_a, p1_c));
     p1.road_sites.insert(HexPath(p1_b, p1_c));
@@ -131,10 +100,8 @@ int roll(int min, int max) {
 }
 
 void Game::update_state_with_dice_roll(GameState *state) {
-    // roll dice
-    //TODO: Better rice rolling algorithm? currently starting w 7
+    //roll dice
     int dice = roll(1,6) + roll(1,6);
-    // std::cout << "in dice roll" << std::endl;
     // if card counts > 7, randomly take half of the resources
     if (dice == 7){
         state->move_robber = true;  //move the robber
@@ -154,7 +121,6 @@ void Game::update_state_with_dice_roll(GameState *state) {
         if (state->player_one.card_count > 7) {
             removed_cards = state->player_one.card_count/2;
             while (removed_cards > 0) {
-                // TODO: This also seems a little biased to [0-2]
                 resource = roll(0,4); // pick a random kind of card to remove
                 if (state->player_one.resource_cards[resource] > 0) {
                     state->player_one.resource_cards[resource]--;
@@ -183,10 +149,8 @@ void Game::update_state_with_dice_roll(GameState *state) {
             for (const auto& hex: settlement.adjacent){
                 if (GameState::tile_rewards[hex] == dice) {
                     if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
-                        // std::cout << "cashout! die roll=" << dice << ", resource =" << land_type << std::endl; 
                         state->player_one.resource_cards[land_type] += 1;
                         state->player_one.card_count += 1;
-                        // std::cout << "updating resources at hex: (" << hex.q <<", "<< hex.r << ") with resource " << land_type << std::endl;
                     }
                 }
             }
@@ -267,12 +231,10 @@ GameState::GameState(Player p1, Player p2, Hex robber_pos, int player_turn, int 
     robber_position = robber_pos;
     current_turn = player_turn;
     turn_number = starting_turn_number;
-    // std::cout << "list size p1:" << p1.settlement_sites.size() <<std::endl;
-    // std::cout << "list size player_one:" << player_one.settlement_sites.size() << std::endl;
 }
 
 bool GameState::is_game_over() {
-    return (player_one.victory_points >= 20) || (player_two.victory_points >= 20);
+    return (player_one.victory_points >= 10) || (player_two.victory_points >= 10);
     // return false;
 }
 
@@ -299,33 +261,203 @@ std::vector<GameState*> GameState::get_all_moves() {
 
     // add the "don't do anything" turn
     all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
+
+    new_p1 = Player(&player_one);
+    new_p2 = Player(&player_two);
+    playing = (current_turn == 0) ? new_p1 : new_p2;
+    // can you cash in resources?
+    for(int resource = 0; resource < 5; resource++){
+        if (playing.resource_cards[resource] >= 4) {
+            playing.resource_cards[resource] -= 4;
+            playing.card_count -= 3;
+            for (int i = 0; i < 5; i++) {
+                if(i == resource) continue;
+                playing.resource_cards[i] += 1;
+                if (move_robber) {
+                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
+                }else {
+                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
+                }
+                playing.resource_cards[i] -= 1;
+            }
+                playing.card_count += 3;
+            playing.resource_cards[resource] += 4;
+        }
+    }
     
-    if (current_turn == 0) {
-        // player 1
-        new_p1 = Player(&player_one);
-        new_p1.victory_points += 1;
-        all_moves.push_back(new GameState(new_p1, player_two, robber_position, next_turn, turn_number+1));
+    // Move the robber
+    if(move_robber){
+        Player victim;
+        if (current_turn == 0) {
+            victim = player_two;
+        } else {
+            victim = player_one;
+        }
+        // get all of the potential locations
+        for(const auto& settlement: victim.settlements)
+            for(const auto& hex: settlement.adjacent)
+                new_robber_hexes.insert(hex);
+        for(const auto& city: victim.cities)
+            for(const auto& hex: city.adjacent)
+                new_robber_hexes.insert(hex);
+    }
 
-        new_p1 = Player(&player_one);
-        new_p1.victory_points += 2;
-        all_moves.push_back(new GameState(new_p1, player_two, robber_position, next_turn, turn_number+1));
+    new_p1 = Player(&player_one);
+    new_p2 = Player(&player_two);
+    playing = (current_turn == 0) ? new_p1 : new_p2;
+    // can you build a road?
+    if (playing.resource_cards[1] >= 2 && playing.resource_cards[4] >= 2) {
+        if(playing.road_sites.size() != 0) {
+            playing.resource_cards[1] -= 2;
+            playing.resource_cards[4] -= 2;
+            playing.card_count -= 4;
+            for (auto& road: playing.road_sites) {
+                Hex h1 = road.hex_one;
+                Hex h2 = road.hex_two;
+                Hex h3 = Hex(-4,-4, -1);
+                Hex h4 = Hex(-4,-4, -1);
 
-        new_p1 = Player(&player_one);
-        new_p1.victory_points -= 1;
-        all_moves.push_back(new GameState(new_p1, player_two, robber_position, next_turn, turn_number+1));
-    } else {
-        // player 2
-        new_p2 = Player(&player_two);
-        new_p2.victory_points += 1;
-        all_moves.push_back(new GameState(player_one, new_p2, robber_position, next_turn, turn_number+1));
+                if(road.axis == 0){     //Axis Q
+                    // find the neighboring tiles
+                    for (auto const& h: GameState::tiles) {
+                        if (h.q == h1.q + 1 && h.r == h1.r) h3 = h;
+                        if (h.q == h2.q - 1 && h.r == h2.r) h4 = h;
+                    }
+                } else if (road.axis == 1){ //Axis R
+                    // find the neighboring tiles
+                    for (auto const& h: GameState::tiles) {
+                        if (h.q == h1.q && h.r == h1.r - 1) h3 = h;
+                        if (h.q == h2.q && h.r == h2.r + 1) h4 = h;
+                    }
+                } else if (road.axis == 2) {    //Axis S
+                    // find the neighboring tiles
+                    for (auto const& h: GameState::tiles) {
+                        if (h.q == h2.q && h.r == h2.r - 1) h3 = h;
+                        if (h.q == h1.q && h.r == h1.r + 1) h4 = h;
+                    }
+                }
 
-        new_p2 = Player(&player_two);
-        new_p2.victory_points += 2;
-        all_moves.push_back(new GameState(player_one, new_p2, robber_position, next_turn, turn_number+1));
+                bool t1, t2, t3, t4, s1, s2;
+                t1 = t2 = t3 = t4 = s1 = s2 = false;
 
-        new_p2 = Player(&player_two);
-        new_p2.victory_points -= 1;
-        all_moves.push_back(new GameState(player_one, new_p2, robber_position, next_turn, turn_number+1));
+                // check that the road isn't already listed, Ensure that it won't be out of bounds, Try to add.
+                if (abs(h3.q) <= 3 && abs(h3.r <=3)) {
+                    if ((playing.roads.find(HexPath(h1,h3)) != playing.roads.end())) t1 = playing.road_sites.insert(HexPath(h1,h3)).second;
+                    if ((playing.roads.find(HexPath(h2,h3)) != playing.roads.end())) t2 = playing.road_sites.insert(HexPath(h2,h3)).second;
+                    s1 = playing.settlement_sites.insert(HexIntersection(HexPath(h1,h2), HexPath(h2,h3), HexPath(h1,h3))).second;
+                }
+                if (abs(h4.q) <= 3 && abs(h4.r <=3)){
+                    if ((playing.roads.find(HexPath(h1,h4)) != playing.roads.end())) t3 = playing.road_sites.insert(HexPath(h1,h4)).second;
+                    if ((playing.roads.find(HexPath(h2,h4)) != playing.roads.end())) t4 = playing.road_sites.insert(HexPath(h2,h4)).second;
+                    s2 = playing.settlement_sites.insert(HexIntersection(HexPath(h1,h2), HexPath(h1,h4), HexPath(h2,h4))).second;
+                }
+
+                // remove the "built" road from the speculative road list and add it to the "built" road list
+                playing.roads.insert(road);
+                playing.road_sites.erase(road);
+                // built road along with wherever the robber is being moved, if we are moving it
+                if (move_robber) {
+                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
+                }else {
+                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
+                }
+
+                // undo all of the changes
+                playing.roads.erase(road);
+                playing.road_sites.insert(road);
+
+                if (t1) playing.road_sites.erase(HexPath(h1,h3));
+                if (t2) playing.road_sites.erase(HexPath(h2,h3));
+                if (t3) playing.road_sites.erase(HexPath(h1,h4));
+                if (t4) playing.road_sites.erase(HexPath(h2,h4));
+                if (s1) playing.settlement_sites.erase(HexIntersection(HexPath(h1,h2), HexPath(h2,h3), HexPath(h1,h3)));
+                if (s2) playing.settlement_sites.erase(HexIntersection(HexPath(h1,h2), HexPath(h1,h4), HexPath(h2,h4)));
+            }
+            playing.resource_cards[1] += 2;
+            playing.resource_cards[4] += 2;
+            playing.card_count += 4;
+        }
+    }
+
+    new_p1 = Player(&player_one);
+    new_p2 = Player(&player_two);
+    playing = (current_turn == 0) ? new_p1 : new_p2;
+    // can you build a settlement?
+    if (playing.resource_cards[0] >= 1 && playing.resource_cards[1] >= 1 && playing.resource_cards[2] >= 1 && playing.resource_cards[4] >= 1) {
+        if(playing.settlement_sites.size() != 0) {
+            playing.resource_cards[0] -= 1;
+            playing.resource_cards[1] -= 1;
+            playing.resource_cards[2] -= 1;
+            playing.resource_cards[4] -= 1;
+            playing.card_count -= 4;
+            for (auto& site: playing.settlement_sites) {
+                playing.settlement_sites.erase(site);
+                playing.settlements.insert(site);
+                playing.victory_points += 1;
+                if (move_robber) {
+                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
+                }else {
+                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
+                }
+                playing.settlement_sites.insert(site);
+                playing.settlements.erase(site);
+            }
+            playing.resource_cards[0] += 1;
+            playing.resource_cards[1] += 1;
+            playing.resource_cards[2] += 1;
+            playing.resource_cards[4] += 1;
+            playing.card_count += 4;
+        }
+    }
+
+    new_p1 = Player(&player_one);
+    new_p2 = Player(&player_two);
+    playing = (current_turn == 0) ? new_p1 : new_p2;
+    // can you make a city?
+    if (playing.resource_cards[0] >= 2 && playing.resource_cards[3] >= 3) {
+        if(playing.settlement_sites.size() != 0) {
+            playing.resource_cards[0] -= 2;
+            playing.resource_cards[3] -= 3;
+            playing.card_count -= 5;
+            for (auto& settlement: playing.settlements) {
+                playing.settlements.erase(settlement);
+                playing.cities.insert(settlement);
+                playing.victory_points += 1;
+                if (move_robber) {
+                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
+                }else {
+                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
+                }
+                playing.settlements.insert(settlement);
+                playing.cities.erase(settlement);
+            }
+            playing.resource_cards[0] += 2;
+            playing.resource_cards[3] += 3;
+            playing.card_count += 5;
+        }
+    }
+
+    new_p1 = Player(&player_one);
+    new_p2 = Player(&player_two);
+    playing = (current_turn == 0) ? new_p1 : new_p2;
+    // can you buy a victory point?
+    if (playing.resource_cards[0] >= 1 && playing.resource_cards[2] >= 1 && playing.resource_cards[3] >= 1) {
+            playing.resource_cards[0] -= 1;
+            playing.resource_cards[2] -= 1;
+            playing.resource_cards[3] -= 1;
+            playing.card_count -= 3;
+            
+            // "buy" the dev card
+            playing.victory_points += 1;
+            if (move_robber) {
+                for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
+            }else {
+                all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
+            }
+            playing.resource_cards[0] += 1;
+            playing.resource_cards[2] += 1;
+            playing.resource_cards[3] += 1;
+            playing.card_count += 3;
     }
 
     return all_moves;
@@ -406,7 +538,6 @@ bool Player::operator==(const Player& player) const {
     return true;
 }
 
-// TODO: ensure that this works
 bool GameState::operator==(const GameState& state) const {
 
     // check if both players are the same
@@ -419,7 +550,6 @@ bool GameState::operator==(const GameState& state) const {
     // check turn
     if (!(current_turn == state.current_turn)) return false;
     
-    // TODO: check turn number maybe this is not needed?
     if (turn_number != state.turn_number) return false;
 
     return true;
