@@ -142,6 +142,7 @@ void Game::update_state_with_dice_roll(GameState *state) {
             for (const auto& hex: settlement.adjacent){
                 if (GameState::tile_rewards[hex] == dice) {
                     if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
+                        std::cout << "cashout! die roll=" << dice << ", resource =" << land_type << std::endl; 
                         state->player_one.resource_cards[land_type] += 1;
                         state->player_one.card_count += 1;
                         // std::cout << "updating resources at hex: (" << hex.q <<", "<< hex.r << ") with resource " << land_type << std::endl;
@@ -259,6 +260,27 @@ std::vector<GameState*> GameState::get_all_moves() {
 
     // add the "don't do anything" turn
     all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
+
+    new_p1 = Player(&player_one);
+    new_p2 = Player(&player_two);
+    playing = (current_turn == 0) ? new_p1 : new_p2;
+    // can you cash in resources?
+    for(int resource = 0; resource < 5; resource++){
+        if (playing.resource_cards[resource] >= 4) {
+            playing.resource_cards[resource] -= 4;
+            for (int i = 0; i < 5; i++) {
+                if(i == resource) continue;
+                playing.resource_cards[i] += 1;
+                if (move_robber) {
+                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
+                }else {
+                    std::cout << "I can cash in resource num=" << resource << std::endl;
+                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
+                }
+            }
+            playing.resource_cards[resource] += 4;
+        }
+    }
     
     // Move the robber
     if(move_robber){
@@ -429,8 +451,7 @@ std::vector<GameState*> GameState::get_all_moves() {
             playing.resource_cards[2] += 1;
             playing.resource_cards[3] += 1;
     }
-    
-    
+
     return all_moves;
 }
 
