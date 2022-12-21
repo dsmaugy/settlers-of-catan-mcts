@@ -176,6 +176,10 @@ bool GameState::is_game_over() {
 
 // TODO: ensure that this works
 Player GameState::game_winner() {
+    if (!is_game_over()) {
+        std::cerr << "Tried to view winner of non-terminal game state" << std::endl;
+        exit(1);
+    }
     Player winner = (player_one.victory_points == 10) ? player_one : player_two; 
     return winner;
 }

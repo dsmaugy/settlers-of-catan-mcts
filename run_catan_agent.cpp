@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unordered_map>
+#include <string.h>
 
 
 #include "omp.h"
@@ -9,6 +10,8 @@
 #include <chrono>
 
 #define TIME_DIFF_MILLISECONDS(start, end) (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count())
+
+const char *CMD_LINE_ERROR = "Invalid command line arguments. Usage: ./run_catan_agent <mcts-serial|mcts-parallel|random> <mcts-serial|mcts-parallel|random> <mcts time limit>";
 
 int main(int argc, char** argv) {
     std::cout << "hello world" << "df\n";
@@ -23,86 +26,56 @@ int main(int argc, char** argv) {
     Hex set_test2 = Hex(1,0,3);
     std::cout << "GameState set/map worked, since set_test has value " << GameState::tile_rewards[set_test] << std::endl;
     std::cout << "GameState set/map worked, since set_test2 has value " << GameState::tile_rewards[set_test2] << std::endl;
-
-
     
+    // get command line args
+    char *p1_policy_arg, *p2_policy_arg;
+    float time_limit;
 
-
-    Hex hex_one = Hex(0, 0, 0);
-    Hex hex_two = Hex(1, -1, 0);
-    Hex hex_three = Hex(1, 0, 0);
-    Hex hex_four = Hex(0, -1, 0);
-
-    HexPath road_one = HexPath(hex_one, hex_two);
-    HexPath road_two = HexPath(hex_one, hex_three);
-    HexPath road_three = HexPath(hex_two, hex_three);
-    HexPath road_four = HexPath(hex_one, hex_four);
-    HexPath road_five = HexPath(hex_two, hex_four);
-
-    // HexPath road_one_equivalent = HexPath(hex_two, hex_one);
-    
-
-    // std::unordered_map<Hex, int, HashHex> hex_map;
-    // hex_map[hex_one] = -1;
-
-    std::unordered_map<HexPath, int, HashPath> road_map;
-    road_map[road_one] = 21;
-    road_map[road_two] = 22;
-    road_map[road_three] = 23;
-    road_map[road_four] += 24;
-    road_map[road_five] += 25;
-
-    Hex test_hex = Hex(1, 1, 0);
-    std::unordered_map<Hex, Reward_Visit_Pair, HashHex> state_map;
-    state_map[test_hex].first += 5;
-    std::cout << "TH1: " << state_map[test_hex].first << " TH2: " << state_map[test_hex].second << std::endl;
-
-    // std::unordered_map<HexIntersection, int, HashIntersection> building_map;
-    //     HexIntersection building_two = {road_one, road_two};
-
-    HexIntersection building_one = HexIntersection(road_one, road_two, road_three);
-    HexIntersection building_two = HexIntersection(road_one, road_four, road_five);
-
-    for(const auto& hex: building_one.adjacent){
-        std::cout << "hex: q=" << hex.q << ", r=" << hex.r << std::endl;
+    if (argc != 4) {
+        std::cerr << CMD_LINE_ERROR << std::endl;
+        exit(-1);
     }
 
-    for(const auto& hex: building_two.adjacent){
-        std::cout << "hex: q=" << hex.q << ", r=" << hex.r << std::endl;
+    PlayerPolicy *p1_policy, *p2_policy;
+    Player p1, p2;
+    Game catan_game;
+
+    p1_policy_arg = argv[1];
+    p2_policy_arg = argv[2];
+    time_limit = atof(argv[3]);
+
+    if (strcmp(p1_policy_arg, "mcts-serial") == 0) {
+        p1_policy = new MCTSPolicy(time_limit, false);
+    } else if (strcmp(p1_policy_arg, "mcts-parallel") == 0) {
+        p1_policy = new MCTSPolicy(time_limit, true);
+    } else if (strcmp(p1_policy_arg, "random") == 0) {
+        p1_policy = new RandomPolicy();
+    } else {
+        std::cerr << CMD_LINE_ERROR << std::endl;
+        exit(-1);
     }
 
+    if (strcmp(p2_policy_arg, "mcts-serial") == 0) {
+        p2_policy = new MCTSPolicy(time_limit, false);
+    } else if (strcmp(p2_policy_arg, "mcts-parallel") == 0) {
+        p2_policy = new MCTSPolicy(time_limit, true);
+    } else if (strcmp(p2_policy_arg, "random") == 0) {
+        p2_policy = new RandomPolicy();
+    } else {
+        std::cerr << CMD_LINE_ERROR << std::endl;
+        exit(-1);
+    }
 
-    std::cout << " r1: " << road_map[building_one.path_one] << ", r2: " << road_map[building_one.path_two] << ", r3: " << road_map[building_one.path_three] <<std::endl;
-    std::cout << " r1: " << road_map[building_two.path_one] << ", r2: " << road_map[building_two.path_two] << ", r3: " << road_map[building_two.path_three] <<std::endl;
+    #pragma omp parallel
+    {
+        if (omp_get_thread_num() == 0) 
+        std::cout << "Running CATAN agent with " << omp_get_num_threads() << " threads." << std::endl;
+    }
 
-
-    RandomPolicy random_policy = RandomPolicy();
-    MCTSPolicy mcts_policy = MCTSPolicy(5, true);
-    Player p1 = Player(&random_policy);
-    Player p2 = Player(&mcts_policy);
-
-    p2.cities.insert(building_one);
-    p1.cities.insert(building_one);
-
-    std::cout << "p1==p2?: " << (p1 == p2) << std::endl;
-    // for (const auto& i : p1.resource_cards) {
-    //     std::cout << i << std::endl;
-    // }
-    // building_map[building_one] = 18;
-    // building_map[building_two] = 17;
-
-    // Player *p1 = new Player();
-    // std::cout << "Hex One val: " << hex_map[hex_one] << std::endl;
-    // std::cout << "Road One: " << road_map[road_one] << " Road Two: " << road_map[road_two] << " Road Three: " << road_map[road_three] << std::endl;
-    // std::cout << "Building One: " << building_map[building_one] << " Building Two: " << building_map[building_two] << std::endl;
-    // std::cout << "Hex Path equivalence associativity: " << (road_one_equivalent == road_one) << std::endl;
-    // omp_set_num_threads(4);
-    // #pragma omp parallel
-    // {
-    //     if (omp_get_thread_num() == 0) 
-    //     std::cout << "Running program with " << omp_get_num_threads() << " threads out of max " << omp_get_max_threads() << std::endl;
-    // }
-
+    
+    p1 = Player(p1_policy);
+    p2 = Player(p2_policy);
+    catan_game = Game(p1, p2);
     
     return 0;
 }

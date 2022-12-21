@@ -24,7 +24,7 @@ GameState *RandomPolicy::get_best_move(GameState *root_state) {
 }
 
 // MCTS POLICY
-MCTSPolicy::MCTSPolicy(int limit, bool parallel) {
+MCTSPolicy::MCTSPolicy(float limit, bool parallel) {
     train_time_limit_sec = limit;
     is_parallel = parallel;
 }
@@ -42,16 +42,26 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
     int visit = 0;
     RandomPolicy random_picker;
     
+    // TODO needs verification
     if (is_parallel) {
-        // TODO: implement
-        #pragma omp parallel default(none) reduction(+:reward) reduction(+:visit)
+        #pragma omp parallel default(none) firstprivate(random_picker, state) reduction(+:reward) reduction(+:visit)
         {
-            // state->get_all_moves();
+            GameState *current_state = state;
+            while (!current_state->is_game_over()) {
+                current_state = random_picker.get_best_move(current_state);
+                if (!current_state->is_game_over())
+                    Game::update_state_with_dice_roll(current_state);
+            }
+            visit = 1;
+            if (current_state->game_winner() == current_state->player_one) reward = 1;
         }
     } else {
-        // TODO: factor in dice roll
         GameState *current_state = state;
-        while (!current_state->is_game_over()) current_state = random_picker.get_best_move(current_state);
+        while (!current_state->is_game_over()) {
+            current_state = random_picker.get_best_move(current_state);
+            if (!current_state->is_game_over())
+                Game::update_state_with_dice_roll(current_state);
+        }
         visit = 1;
         if (current_state->game_winner() == current_state->player_one) reward = 1;
     }
@@ -99,7 +109,6 @@ void MCTSPolicy::update_mcts(GameState *root_state) {
     explore_tree_path.push(current_state);
     bool encountered_leaf = false;
     while (!current_state->is_game_over() && !encountered_leaf) {
-        // TODO: factor in dice roll 
         std::vector<GameState*> possible_moves = current_state->get_all_moves();
         GameState* current_target_child_state;       // will hold best move to make
         double current_target_ucb_value;
@@ -113,7 +122,8 @@ void MCTSPolicy::update_mcts(GameState *root_state) {
             MCTS_Edge parent_child_edge = std::make_pair(*current_state, *child_state);
             if (!IS_IN_SET(edge_map, parent_child_edge)) {
                 // encountered a leaf node
-                explore_tree_path.push(child_state);
+                // explore_tree_path.push(child_state);
+                current_target_child_state = child_state;
                 encountered_leaf = true;
                 break;
             } else {
@@ -135,10 +145,13 @@ void MCTSPolicy::update_mcts(GameState *root_state) {
         // go down best UCB child
         explore_tree_path.push(current_target_child_state);
         current_state = current_target_child_state;
+
+        // factor in dice roll with new move
+        Game::update_state_with_dice_roll(current_state);
     }
 
     // at this point *current_state should hold the leaf node, we can start simulating from here
-    Reward_Visit_Pair simulation_outcome = mcts_simulation(root_state);
+    Reward_Visit_Pair simulation_outcome = mcts_simulation(current_state);
 
     // propagate the results back up the tree
     // accessing the state/edge map with array notation should initialize values if they don't exist

@@ -18,14 +18,15 @@ class HashMCTSEdge {
 class RandomPolicy: public PlayerPolicy {
     public:
         GameState *get_best_move(GameState *root_state);
+        RandomPolicy() {};
 };
 
 class MCTSPolicy: public PlayerPolicy {
     public:
-        int train_time_limit_sec;
+        float train_time_limit_sec;
         bool is_parallel;
 
-        MCTSPolicy(int limit, bool parallel);
+        MCTSPolicy(float limit, bool parallel);
         GameState *get_best_move(GameState *root_state);
 
     private:

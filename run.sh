@@ -16,4 +16,4 @@ make clean
 make
 
 export OMP_NUM_THREADS=20
-./run_catan_agent.app
+./run_catan_agent.app mcts random 5
