@@ -46,7 +46,7 @@ Game::Game(Player p1, Player p2) {
                 } else {
                     h = Hex(q,r, LAND[l++]); // Resource tile
                 }
-                // std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v=" << v*/ <<std::endl; 
+                std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v= << v*/ <<std::endl; 
                 tiles.insert(h);
                 tile_rewards[h] = val;
             }
@@ -56,17 +56,42 @@ Game::Game(Player p1, Player p2) {
         else 
             r2--;
     }
+    std::cout << "--------------" << std::endl;
     //Initialize the player's starter structures, and look-ahead lists for roads and settlements
     Hex p1_a, p1_b, p1_c, p1_d, p2_a, p2_b, p2_c, p2_d;
     for (auto const &h: tiles) {
-        if(h.q == -1 && h.r == -1) p1_a = h; 
-        if(h.q == -2 && h.r == -1) p1_b = h; 
-        if(h.q == -2 && h.r == -2) p1_c = h; 
-        if(h.q == -1 && h.r == 0) p1_d = h; 
-        if(h.q == 1 && h.r == -1) p2_a = h; 
-        if(h.q == 2 && h.r == -1) p2_b = h; 
-        if(h.q == 2 && h.r == -2) p2_c = h; 
-        if(h.q == 1 && h.r == 0) p2_d = h; 
+        if(h.q == -1 && h.r == 1) {
+            p1_a = h; 
+            std::cout << "1aland type=" << p1_a.land_type << std::endl;
+        }
+        if(h.q == -2 && h.r == 1) {
+            p1_b = h; 
+            std::cout << "1bland type=" << p1_b.land_type << std::endl;
+        }
+        if(h.q == -2 && h.r == 2) {
+            p1_c = h; 
+            std::cout << "1cland type=" << p1_c.land_type << std::endl;
+        }
+        if(h.q == -1 && h.r == 0) {
+            p1_d = h; 
+            std::cout << "1dland type=" << p1_d.land_type << std::endl;
+        }
+        if(h.q == 1 && h.r == -1) {
+            p2_a = h; 
+            std::cout << "2aland type=" << p2_a.land_type << std::endl;
+        }
+        if(h.q == 2 && h.r == -1) {
+            p2_b = h; 
+            std::cout << "2bland type=" << p2_b.land_type << std::endl;
+        }
+        if(h.q == 2 && h.r == -2) {
+            p2_c = h; 
+            std::cout << "2cland type=" << p2_c.land_type << std::endl;
+        }
+        if(h.q == 1 && h.r == 0) {
+            p2_d = h; 
+            std::cout << "2dland type=" << p2_d.land_type << std::endl;
+        }
     }
 
     HexIntersection p1_starter = HexIntersection(HexPath(p1_a, p1_b),HexPath(p1_b, p1_c),HexPath(p1_a, p1_c));
@@ -142,7 +167,7 @@ void Game::update_state_with_dice_roll(GameState *state) {
             for (const auto& hex: settlement.adjacent){
                 if (GameState::tile_rewards[hex] == dice) {
                     if ((land_type = hex.land_type) != -1 && hex != state->robber_position) {
-                        std::cout << "cashout! die roll=" << dice << ", resource =" << land_type << std::endl; 
+                        // std::cout << "cashout! die roll=" << dice << ", resource =" << land_type << std::endl; 
                         state->player_one.resource_cards[land_type] += 1;
                         state->player_one.card_count += 1;
                         // std::cout << "updating resources at hex: (" << hex.q <<", "<< hex.r << ") with resource " << land_type << std::endl;
@@ -275,7 +300,7 @@ std::vector<GameState*> GameState::get_all_moves() {
                 if (move_robber) {
                     for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
                 }else {
-                    std::cout << "I can cash in resource num=" << resource << std::endl;
+                    // std::cout << "I can cash in resource num=" << resource << std::endl;
                     all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
                 }
                 playing.resource_cards[i] -= 1;
