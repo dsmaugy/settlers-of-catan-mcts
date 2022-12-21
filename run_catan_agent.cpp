@@ -66,8 +66,12 @@ int main(int argc, char** argv) {
     for (int i=0; i < num_games; i++) {
         p1 = Player(p1_policy);
         p2 = Player(p2_policy);
+        // std::cout << "speculative =" << p1.settlement_sites.size() << std::endl;
         catan_game = Game(p1, p2);
+
         int game_status = catan_game.next_turn();
+        printf("Game Check %ld\n",catan_game.game_state->player_one.settlement_sites.size());
+        fflush(stdout);
         int turn = 1;
         while (game_status == 0) {
             std::cout << "GAME TURN #: " << turn << std::endl;

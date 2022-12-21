@@ -46,7 +46,7 @@ Game::Game(Player p1, Player p2) {
                 } else {
                     h = Hex(q,r, LAND[l++]); // Resource tile
                 }
-                std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v= << v*/ <<std::endl; 
+                // std::cout << "Hex at (" << h.q << "," << h.r << ") has land value " << h.land_type << " and reward value " << val /*<< ",l=" << l << ", v= << v*/ <<std::endl; 
                 tiles.insert(h);
                 tile_rewards[h] = val;
             }
@@ -56,47 +56,52 @@ Game::Game(Player p1, Player p2) {
         else 
             r2--;
     }
-    std::cout << "--------------" << std::endl;
+    // std::cout << "--------------" << std::endl;
     //Initialize the player's starter structures, and look-ahead lists for roads and settlements
     Hex p1_a, p1_b, p1_c, p1_d, p2_a, p2_b, p2_c, p2_d;
     for (auto const &h: tiles) {
         if(h.q == -1 && h.r == 1) {
             p1_a = h; 
-            std::cout << "1aland type=" << p1_a.land_type << std::endl;
+            // std::cout << "1aland type=" << p1_a.land_type << std::endl;
         }
         if(h.q == -2 && h.r == 1) {
             p1_b = h; 
-            std::cout << "1bland type=" << p1_b.land_type << std::endl;
+            // std::cout << "1bland type=" << p1_b.land_type << std::endl;
         }
         if(h.q == -2 && h.r == 2) {
             p1_c = h; 
-            std::cout << "1cland type=" << p1_c.land_type << std::endl;
+            // std::cout << "1cland type=" << p1_c.land_type << std::endl;
         }
         if(h.q == -1 && h.r == 0) {
             p1_d = h; 
-            std::cout << "1dland type=" << p1_d.land_type << std::endl;
+            // std::cout << "1dland type=" << p1_d.land_type << std::endl;
         }
         if(h.q == 1 && h.r == -1) {
             p2_a = h; 
-            std::cout << "2aland type=" << p2_a.land_type << std::endl;
+            // std::cout << "2aland type=" << p2_a.land_type << std::endl;
         }
         if(h.q == 2 && h.r == -1) {
             p2_b = h; 
-            std::cout << "2bland type=" << p2_b.land_type << std::endl;
+            // std::cout << "2bland type=" << p2_b.land_type << std::endl;
         }
         if(h.q == 2 && h.r == -2) {
             p2_c = h; 
-            std::cout << "2cland type=" << p2_c.land_type << std::endl;
+            // std::cout << "2cland type=" << p2_c.land_type << std::endl;
         }
         if(h.q == 1 && h.r == 0) {
             p2_d = h; 
-            std::cout << "2dland type=" << p2_d.land_type << std::endl;
+            // std::cout << "2dland type=" << p2_d.land_type << std::endl;
         }
     }
+    // bool b1;
 
     HexIntersection p1_starter = HexIntersection(HexPath(p1_a, p1_b),HexPath(p1_b, p1_c),HexPath(p1_a, p1_c));
     p1.settlements.insert(p1_starter);
-    p1.settlement_sites.insert(HexIntersection(HexPath(p1_a, p1_b), HexPath(p1_a, p1_c), HexPath(p1_b, p1_c)));
+    p1.settlement_sites.insert(HexIntersection(HexPath(p1_a, p1_b), HexPath(p1_a, p1_d), HexPath(p1_b, p1_d)));
+    
+    // std::cout << "list size p1:" << p1.settlement_sites.size();
+    // std::cout << "insert status: " << b1 <<std::endl;
+    
     p1.roads.insert(HexPath(p1_a, p1_b));
     p1.road_sites.insert(HexPath(p1_a, p1_c));
     p1.road_sites.insert(HexPath(p1_b, p1_c));
@@ -106,7 +111,7 @@ Game::Game(Player p1, Player p2) {
 
     HexIntersection p2_starter = HexIntersection(HexPath(p2_a, p2_b),HexPath(p2_b, p2_c),HexPath(p2_a, p2_c));
     p2.settlements.insert(p2_starter);
-    p2.settlement_sites.insert(HexIntersection(HexPath(p2_a, p2_b), HexPath(p2_a, p2_c), HexPath(p2_b, p2_c)));
+    p2.settlement_sites.insert(HexIntersection(HexPath(p2_a, p2_b), HexPath(p2_a, p2_d), HexPath(p2_b, p2_d)));
     p2.roads.insert(HexPath(p2_a, p2_b));
     p2.road_sites.insert(HexPath(p2_b, p2_c));
     p2.road_sites.insert(HexPath(p2_a, p2_c));
@@ -264,6 +269,8 @@ GameState::GameState(Player p1, Player p2, Hex robber_pos, int player_turn, int 
     robber_position = robber_pos;
     current_turn = player_turn;
     turn_number = starting_turn_number;
+    // std::cout << "list size p1:" << p1.settlement_sites.size() <<std::endl;
+    // std::cout << "list size player_one:" << player_one.settlement_sites.size() << std::endl;
 }
 
 // TODO: ensure that this works
@@ -341,6 +348,8 @@ std::vector<GameState*> GameState::get_all_moves() {
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
     playing = (current_turn == 0) ? new_p1 : new_p2;
+    // if(new_p1.road_sites.size() != 0) printf("new_p1:about to check for roads\n");
+    // if(player_one.road_sites.size() != 0) printf("player_one gets all the roads!\n");
     // can you build a road?
     if (playing.resource_cards[1] >= 2 && playing.resource_cards[4] >= 2) {
         if(playing.road_sites.size() != 0) {
@@ -357,19 +366,25 @@ std::vector<GameState*> GameState::get_all_moves() {
                     // find the neighboring tiles
                     for (auto const& h: GameState::tiles) {
                         if (h.q == h1.q + 1 && h.r == h1.r) h3 = h;
+                        // else printf("failed here\n");
                         if (h.q == h2.q - 1 && h.r == h2.r) h4 = h;
+                        // else printf("failed here\n");
                     }
                 } else if (road.axis == 1){ //Axis R
                     // find the neighboring tiles
                     for (auto const& h: GameState::tiles) {
                         if (h.q == h1.q && h.r == h1.r - 1) h3 = h;
+                        // else printf("failed here\n");
                         if (h.q == h2.q && h.r == h2.r + 1) h4 = h;
+                        // else printf("failed here\n");
                     }
                 } else if (road.axis == 2) {    //Axis S
                     // find the neighboring tiles
                     for (auto const& h: GameState::tiles) {
                         if (h.q == h2.q && h.r == h2.r - 1) h3 = h;
+                        // else printf("failed here\n");
                         if (h.q == h1.q && h.r == h1.r + 1) h4 = h;
+                        // else printf("failed here\n");
                     }
                 }
                 // std::pair<std::unordered_set<Hex,HashHex>::iterator, bool> t1,t2,t3,t4;
@@ -433,6 +448,7 @@ std::vector<GameState*> GameState::get_all_moves() {
                 playing.settlement_sites.erase(site);
                 playing.settlements.insert(site);
                 playing.victory_points += 1;
+                printf("I can buy a house\n");
                 if (move_robber) {
                     for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
                 }else {
@@ -534,6 +550,9 @@ Player::Player(Player *player) {
     for (const auto& road: player->roads) roads.insert(road);
     for (const auto& settlement: player->settlements) settlements.insert(settlement);
     for (const auto& city: player->cities) cities.insert(city);
+
+    for (const auto& road_site: player->road_sites) road_sites.insert(road_site);
+    for (const auto& settlement_site: player->settlement_sites) settlement_sites.insert(settlement_site);
 }
 
 bool Player::operator==(const Player& player) const {
@@ -596,38 +615,6 @@ bool GameState::operator==(const GameState& state) const {
 GameState *Player::get_player_move(GameState *game_state) {
     return player_policy->get_best_move(game_state);
 }
-
-// Keep a list of possible road locations, update as you build roads
-// Same for settlement sites
-
-// Finding adjacent roads: depending on orientation of built road, you can figure out the other two
-// that are connected to it.
-
-// Possible moves
-// Build a road
-// Build a settlemnt
-// Upgrade a settlment -> City
-// Build a dev card (but not use it right away)
-// Use prev held dev cards
-
-
-// Turn possibility
-// 
-// CAN build up to 1 item
-// CAN play a dev card
-// or you can do nothing for either of those
-
-// Next move func
-
-//  roll die, collect resources for all players
-//  for current player, feed current GameState to get_player_move to get that player's move
-//  Update the GameState to the one
-// returned from the player's policy
-// (need to free the old GameState as the one returned from the player's policy will have been allocated on the heap by get_all_moves())
-
-
-
-
 
 
 
