@@ -19,9 +19,10 @@ int main(int argc, char** argv) {
     // // GameState::tiles = unordered_set<Hex> tiles;
     // // GameState::tile_rewards = unordered_map<Hex> tile_rewards;
 
-    // Player one = Player();
-    // Player two = Player();
+    Player one = Player();
+    Player two = Player();
 
+    Game game = Game(Player(), Player());
     // Game game = Game(one, two);
 
     // // std::cout << "Settlements here:" << game.game_state.player_one.settlements.size() << std::endl;

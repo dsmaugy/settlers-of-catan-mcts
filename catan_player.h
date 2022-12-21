@@ -8,7 +8,7 @@
 
 
 const int NUM_RESOURCES = 5;
-const int NUM_DEVELOPMENT_CARDS = 2;
+const int NUM_DEVELOPMENT_CARDS = 1;
 
 // forward declare
 class GameState;
@@ -18,8 +18,8 @@ class Player {
     public:
         PlayerPolicy *player_policy;
 
-        int resource_cards [NUM_RESOURCES];
-        int dev_cards [NUM_DEVELOPMENT_CARDS];
+        int resource_cards [NUM_RESOURCES];     //wheat, wood, wool, ore, brick
+        int dev_cards [NUM_DEVELOPMENT_CARDS];  // Victory points
 
         int card_count;
         int victory_points;
