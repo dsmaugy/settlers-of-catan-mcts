@@ -42,7 +42,7 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
     int reward = 0;
     int visit = 0;
     RandomPolicy random_picker;
-    // std::cout << "starting simulation" << std::endl;
+    std::cout << "starting simulation" << std::endl;
     
     // TODO needs verification
     if (is_parallel) {
@@ -60,24 +60,28 @@ Reward_Visit_Pair MCTSPolicy::mcts_simulation(GameState *state) {
     } else {
         GameState *current_state = state;
         while (!current_state->is_game_over()) {
+            std::cout << "pre best";
             current_state = random_picker.get_best_move(current_state);
+            std::cout << "post best";
             std::cout << "P1 VP: "; 
             for(int i = 0; i < 5; i++) {
                 std::cout << current_state->player_one.resource_cards[i];
             }
-            std::cout << std::endl;
+            std::cout << "pre roll";
             if (!current_state->is_game_over())
                 Game::update_state_with_dice_roll(current_state);
+            std::cout << "post roll";
+            std::cout << std::endl;
             // exit(0);
 
         }
-        // std::cout << "done!!!!" << std::endl;
+        std::cout << "done!!!!" << std::endl;
         visit = 1;
         if (current_state->game_winner() == current_state->player_one) reward = 1;
         else reward = -1;
     }
     
-    // std::cout << "done simulation" << std::endl;
+    std::cout << "done simulation" << std::endl;
     return std::make_pair(reward, visit);
 }
 

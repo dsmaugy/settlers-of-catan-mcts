@@ -275,6 +275,7 @@ GameState::GameState(Player p1, Player p2, Hex robber_pos, int player_turn, int 
 
 // TODO: ensure that this works
 bool GameState::is_game_over() {
+    std::cout << "pre game over";
     return (player_one.victory_points >= 10) || (player_two.victory_points >= 10);
     // return false;
 }
@@ -301,7 +302,7 @@ std::vector<GameState*> GameState::get_all_moves() {
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
 
-    std::cout << "Getting all the moves! ";
+    // std::cout << "Getting all the moves! ";
 
     // add the "don't do anything" turn
     all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
@@ -330,7 +331,7 @@ std::vector<GameState*> GameState::get_all_moves() {
         }
     }
 
-    std::cout << " got all the trade moves,";
+    // std::cout << " got all the trade moves,";
     
     // Move the robber
     if(move_robber){
@@ -349,7 +350,7 @@ std::vector<GameState*> GameState::get_all_moves() {
                 new_robber_hexes.insert(hex);
     }
 
-    std::cout << " indexed all the robber moves,";
+    // std::cout << " indexed all the robber moves,";
     
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
@@ -438,7 +439,7 @@ std::vector<GameState*> GameState::get_all_moves() {
         }
     }
 
-    std::cout << " got all the road moves,";
+    // std::cout << " got all the road moves,";
 
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
@@ -472,7 +473,7 @@ std::vector<GameState*> GameState::get_all_moves() {
         }
     }
 
-    std::cout << " got all the settlement moves,";
+    // std::cout << " got all the settlement moves,";
 
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
@@ -501,7 +502,7 @@ std::vector<GameState*> GameState::get_all_moves() {
         }
     }
 
-    std::cout << " got all the city moves,";
+    // std::cout << " got all the city moves,";
 
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
@@ -526,7 +527,7 @@ std::vector<GameState*> GameState::get_all_moves() {
             playing.card_count += 3;
     }
 
-    std::cout << " got all the card moves. All done!" << std::endl;
+    // std::cout << " got all the card moves. All done!" << std::endl;
 
     return all_moves;
 }
