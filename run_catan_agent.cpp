@@ -79,16 +79,21 @@ int main(int argc, char** argv) {
         std::cout << "Running CATAN agent with " << omp_get_num_threads() << " threads." << std::endl;
     }
 
-    
-    p1 = Player(p1_policy);
-    p2 = Player(p2_policy);
+
      
     int p1_wins = 0;
     for (int i=0; i < num_games; i++) {
+        p1 = Player(p1_policy);
+        p2 = Player(p2_policy);
         catan_game = Game(p1, p2);
         int game_status = catan_game.next_turn();
-        while (game_status == 0)
-            catan_game.next_turn();
+        int turn = 1;
+        while (game_status == 0) {
+            std::cout << "GAME TURN #: " << turn << std::endl;
+            game_status = catan_game.next_turn();
+            turn++;
+        }
+            
 
         if (game_status == 1)
             std::cout << "Game ended... Player 1 won!" << std::endl;

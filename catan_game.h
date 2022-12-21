@@ -19,6 +19,7 @@ class GameState{
         Hex robber_position;
 
         int current_turn;
+        int turn_number;
 
         bool move_robber;
 
@@ -35,7 +36,7 @@ class GameState{
         std::vector<GameState*> get_all_moves(); 
 
         // constructor 
-        GameState(Player p1, Player p2, Hex robber_pos, int turn);
+        GameState(Player p1, Player p2, Hex robber_pos, int player_turn, int starting_turn_number);
         GameState() {};
 
         // overloads
