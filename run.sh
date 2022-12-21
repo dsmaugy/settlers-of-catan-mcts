@@ -48,3 +48,11 @@ export OMP_NUM_THREADS=8
 ./run_catan_agent.app mcts-serial mcts-parallel 0.2
 ./run_catan_agent.app mcts-serial mcts-parallel 0.4
 ./run_catan_agent.app mcts-serial mcts-parallel 0.6
+
+echo ""
+
+echo "Running with 20 Threads"
+export OMP_NUM_THREADS=20
+./run_catan_agent.app mcts-serial mcts-parallel 0.2
+./run_catan_agent.app mcts-serial mcts-parallel 0.4
+./run_catan_agent.app mcts-serial mcts-parallel 0.6
