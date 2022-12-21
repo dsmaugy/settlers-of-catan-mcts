@@ -10,10 +10,39 @@
 #SBATCH --output=%x-%j.out
 
 # comment me out if running locally
-# module load intel
+module load intel
 
 make clean
 make
 
-export OMP_NUM_THREADS=20
-./run_catan_agent.app mcts random 5
+./run_catan_agent.app mcts-serial random 0.2
+
+echo ""
+
+export OMP_NUM_THREADS=4
+echo "Running with 4 threads"
+./run_catan_agent.app mcts-parallel random 0.2
+
+echo ""
+
+echo "Running with 4 threads"
+export OMP_NUM_THREADS=4
+./run_catan_agent.app mcts-serial mcts-parallel 0.2
+./run_catan_agent.app mcts-serial mcts-parallel 0.4
+./run_catan_agent.app mcts-serial mcts-parallel 0.6
+
+echo ""
+
+echo "Running with 6 Threads"
+export OMP_NUM_THREADS=6
+./run_catan_agent.app mcts-serial mcts-parallel 0.2
+./run_catan_agent.app mcts-serial mcts-parallel 0.4
+./run_catan_agent.app mcts-serial mcts-parallel 0.6
+
+echo ""
+
+echo "Running with 8 Threads"
+export OMP_NUM_THREADS=8
+./run_catan_agent.app mcts-serial mcts-parallel 0.2
+./run_catan_agent.app mcts-serial mcts-parallel 0.4
+./run_catan_agent.app mcts-serial mcts-parallel 0.6

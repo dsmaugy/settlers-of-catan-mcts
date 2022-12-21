@@ -240,22 +240,20 @@ int Game::next_turn() {
 
     GameState *new_state;
     if (game_state->current_turn == 0) {
-        std::cout << "Player 1 turn..." << std::endl;
+        // std::cout << "Player 1 turn..." << std::endl;
         new_state = game_state->player_one.get_player_move(game_state);
     }
     else {
-        std::cout << "Player 2 turn..." << std::endl;
+        // std::cout << "Player 2 turn..." << std::endl;
         new_state = game_state->player_two.get_player_move(game_state);
     }
 
     delete game_state;
     game_state = new_state;
 
-    std::cout << "REAL P1 RESOURCES: " << game_state->player_one.resource_cards[0] << std::endl;
-    std::cout << "REAL P1 VP: " << game_state->player_one.victory_points << std::endl;
-
-    std::cout << "REAL P2 RESOURCES: " << game_state->player_two.resource_cards[0] << std::endl;
-    std::cout << "REAL P2 VP: " << game_state->player_two.victory_points << std::endl;
+    // std::cout << "P2 POLICY ADDR: " << game_state->player_two.get_player_move << std::endl;
+    // std::cout << "REAL P1 VP: " << game_state->player_one.victory_points << std::endl;
+    // std::cout << "REAL P2 VP: " << game_state->player_two.victory_points << std::endl;
 
     return 0;
 }
@@ -273,20 +271,17 @@ GameState::GameState(Player p1, Player p2, Hex robber_pos, int player_turn, int 
     // std::cout << "list size player_one:" << player_one.settlement_sites.size() << std::endl;
 }
 
-// TODO: ensure that this works
 bool GameState::is_game_over() {
-    std::cout << "pre game over";
-    return (player_one.victory_points >= 10) || (player_two.victory_points >= 10);
+    return (player_one.victory_points >= 20) || (player_two.victory_points >= 20);
     // return false;
 }
 
-// TODO: ensure that this works
 Player GameState::game_winner() {
     if (!is_game_over()) {
         std::cerr << "Tried to view winner of non-terminal game state" << std::endl;
         exit(1);
     }
-    Player winner = (player_one.victory_points >= 10) ? player_one : player_two; 
+    Player winner = (player_one.victory_points >= 20) ? player_one : player_two; 
     return winner;
 }
 
@@ -302,232 +297,36 @@ std::vector<GameState*> GameState::get_all_moves() {
     new_p1 = Player(&player_one);
     new_p2 = Player(&player_two);
 
-    // std::cout << "Getting all the moves! ";
-
     // add the "don't do anything" turn
     all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
-
-    new_p1 = Player(&player_one);
-    new_p2 = Player(&player_two);
-    playing = (current_turn == 0) ? new_p1 : new_p2;
-    // can you cash in resources?
-    for(int resource = 0; resource < 5; resource++){
-        if (playing.resource_cards[resource] >= 4) {
-            playing.resource_cards[resource] -= 4;
-            playing.card_count -= 3;
-            for (int i = 0; i < 5; i++) {
-                if(i == resource) continue;
-                playing.resource_cards[i] += 1;
-                if (move_robber) {
-                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
-                }else {
-                    // std::cout << "I can cash in resource num=" << resource << std::endl;
-                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
-                }
-                playing.resource_cards[i] -= 1;
-            }
-                playing.card_count += 3;
-            playing.resource_cards[resource] += 4;
-        }
-    }
-
-    // std::cout << " got all the trade moves,";
     
-    // Move the robber
-    if(move_robber){
-        Player victim;
-        if (current_turn == 0) {
-            victim = player_two;
-        } else {
-            victim = player_one;
-        }
-        // get all of the potential locations
-        for(const auto& settlement: victim.settlements)
-            for(const auto& hex: settlement.adjacent)
-                new_robber_hexes.insert(hex);
-        for(const auto& city: victim.cities)
-            for(const auto& hex: city.adjacent)
-                new_robber_hexes.insert(hex);
+    if (current_turn == 0) {
+        // player 1
+        new_p1 = Player(&player_one);
+        new_p1.victory_points += 1;
+        all_moves.push_back(new GameState(new_p1, player_two, robber_position, next_turn, turn_number+1));
+
+        new_p1 = Player(&player_one);
+        new_p1.victory_points += 2;
+        all_moves.push_back(new GameState(new_p1, player_two, robber_position, next_turn, turn_number+1));
+
+        new_p1 = Player(&player_one);
+        new_p1.victory_points -= 1;
+        all_moves.push_back(new GameState(new_p1, player_two, robber_position, next_turn, turn_number+1));
+    } else {
+        // player 2
+        new_p2 = Player(&player_two);
+        new_p2.victory_points += 1;
+        all_moves.push_back(new GameState(player_one, new_p2, robber_position, next_turn, turn_number+1));
+
+        new_p2 = Player(&player_two);
+        new_p2.victory_points += 2;
+        all_moves.push_back(new GameState(player_one, new_p2, robber_position, next_turn, turn_number+1));
+
+        new_p2 = Player(&player_two);
+        new_p2.victory_points -= 1;
+        all_moves.push_back(new GameState(player_one, new_p2, robber_position, next_turn, turn_number+1));
     }
-
-    // std::cout << " indexed all the robber moves,";
-    
-    new_p1 = Player(&player_one);
-    new_p2 = Player(&player_two);
-    playing = (current_turn == 0) ? new_p1 : new_p2;
-    // if(new_p1.road_sites.size() != 0) printf("new_p1:about to check for roads\n");
-    // if(player_one.road_sites.size() != 0) printf("player_one gets all the roads!\n");
-    // can you build a road?
-    if (playing.resource_cards[1] >= 2 && playing.resource_cards[4] >= 2) {
-        if(playing.road_sites.size() != 0) {
-            playing.resource_cards[1] -= 2;
-            playing.resource_cards[4] -= 2;
-            playing.card_count -= 4;
-            for (auto& road: playing.road_sites) {
-                Hex h1 = road.hex_one;
-                Hex h2 = road.hex_two;
-                Hex h3 = Hex(-4,-4, -1);
-                Hex h4 = Hex(-4,-4, -1);
-                // Case Q:
-                if(road.axis == 0){     //Axis Q
-                    // find the neighboring tiles
-                    for (auto const& h: GameState::tiles) {
-                        if (h.q == h1.q + 1 && h.r == h1.r) h3 = h;
-                        // else printf("failed here\n");
-                        if (h.q == h2.q - 1 && h.r == h2.r) h4 = h;
-                        // else printf("failed here\n");
-                    }
-                } else if (road.axis == 1){ //Axis R
-                    // find the neighboring tiles
-                    for (auto const& h: GameState::tiles) {
-                        if (h.q == h1.q && h.r == h1.r - 1) h3 = h;
-                        // else printf("failed here\n");
-                        if (h.q == h2.q && h.r == h2.r + 1) h4 = h;
-                        // else printf("failed here\n");
-                    }
-                } else if (road.axis == 2) {    //Axis S
-                    // find the neighboring tiles
-                    for (auto const& h: GameState::tiles) {
-                        if (h.q == h2.q && h.r == h2.r - 1) h3 = h;
-                        // else printf("failed here\n");
-                        if (h.q == h1.q && h.r == h1.r + 1) h4 = h;
-                        // else printf("failed here\n");
-                    }
-                }
-                // std::pair<std::unordered_set<Hex,HashHex>::iterator, bool> t1,t2,t3,t4;
-                // std::pair<std::unordered_set <HexIntersection, HashIntersection>::iterator, bool> s1,s2;
-                bool t1, t2, t3, t4, s1, s2;
-                t1 = t2 = t3 = t4 = s1 = s2 = false;
-
-                // check that the road isn't already yours. Ensure that it won't be out of bounds. Try to add.
-                if (abs(h3.q) <= 3 && abs(h3.r <=3)) {
-                    if ((playing.roads.find(HexPath(h1,h3)) != playing.roads.end())) t1 = playing.road_sites.insert(HexPath(h1,h3)).second;
-                    if ((playing.roads.find(HexPath(h2,h3)) != playing.roads.end())) t2 = playing.road_sites.insert(HexPath(h2,h3)).second;
-                    s1 = playing.settlement_sites.insert(HexIntersection(HexPath(h1,h2), HexPath(h2,h3), HexPath(h1,h3))).second;
-                }
-                if (abs(h4.q) <= 3 && abs(h4.r <=3)){
-                    if ((playing.roads.find(HexPath(h1,h4)) != playing.roads.end())) t3 = playing.road_sites.insert(HexPath(h1,h4)).second;
-                    if ((playing.roads.find(HexPath(h2,h4)) != playing.roads.end())) t4 = playing.road_sites.insert(HexPath(h2,h4)).second;
-                    s2 = playing.settlement_sites.insert(HexIntersection(HexPath(h1,h2), HexPath(h1,h4), HexPath(h2,h4))).second;
-
-                }
-
-                // remove the "built" road from the speculative road list and add it to the "built" road list
-                playing.roads.insert(road);
-                playing.road_sites.erase(road);
-                // built road along with wherever the robber is being moved, if we are moving it
-                if (move_robber) {
-                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
-                }else {
-                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
-                }
-
-                // undo all of that.
-                playing.roads.erase(road);
-                playing.road_sites.insert(road);
-
-                if (t1) playing.road_sites.erase(HexPath(h1,h3));
-                if (t2) playing.road_sites.erase(HexPath(h2,h3));
-                if (t3) playing.road_sites.erase(HexPath(h1,h4));
-                if (t4) playing.road_sites.erase(HexPath(h2,h4));
-                if (s1) playing.settlement_sites.erase(HexIntersection(HexPath(h1,h2), HexPath(h2,h3), HexPath(h1,h3)));
-                if (s2) playing.settlement_sites.erase(HexIntersection(HexPath(h1,h2), HexPath(h1,h4), HexPath(h2,h4)));
-            }
-            playing.resource_cards[1] += 2;
-            playing.resource_cards[4] += 2;
-            playing.card_count += 4;
-        }
-    }
-
-    // std::cout << " got all the road moves,";
-
-    new_p1 = Player(&player_one);
-    new_p2 = Player(&player_two);
-    playing = (current_turn == 0) ? new_p1 : new_p2;
-    // can you build a settlement?
-    if (playing.resource_cards[0] >= 1 && playing.resource_cards[1] >= 1 && playing.resource_cards[2] >= 1 && playing.resource_cards[4] >= 1) {
-        if(playing.settlement_sites.size() != 0) {
-            playing.resource_cards[0] -= 1;
-            playing.resource_cards[1] -= 1;
-            playing.resource_cards[2] -= 1;
-            playing.resource_cards[4] -= 1;
-            playing.card_count -= 4;
-            for (auto& site: playing.settlement_sites) {
-                playing.settlement_sites.erase(site);
-                playing.settlements.insert(site);
-                playing.victory_points += 1;
-                printf("I can buy a house\n");
-                if (move_robber) {
-                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
-                }else {
-                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
-                }
-                playing.settlement_sites.insert(site);
-                playing.settlements.erase(site);
-            }
-            playing.resource_cards[0] += 1;
-            playing.resource_cards[1] += 1;
-            playing.resource_cards[2] += 1;
-            playing.resource_cards[4] += 1;
-            playing.card_count += 4;
-        }
-    }
-
-    // std::cout << " got all the settlement moves,";
-
-    new_p1 = Player(&player_one);
-    new_p2 = Player(&player_two);
-    playing = (current_turn == 0) ? new_p1 : new_p2;
-    // can you make a city?
-    if (playing.resource_cards[0] >= 2 && playing.resource_cards[3] >= 3) {
-        if(playing.settlement_sites.size() != 0) {
-            playing.resource_cards[0] -= 2;
-            playing.resource_cards[3] -= 3;
-            playing.card_count -= 5;
-            for (auto& settlement: playing.settlements) {
-                playing.settlements.erase(settlement);
-                playing.cities.insert(settlement);
-                playing.victory_points += 1;
-                if (move_robber) {
-                    for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
-                }else {
-                    all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
-                }
-                playing.settlements.insert(settlement);
-                playing.cities.erase(settlement);
-            }
-            playing.resource_cards[0] += 2;
-            playing.resource_cards[3] += 3;
-            playing.card_count += 5;
-        }
-    }
-
-    // std::cout << " got all the city moves,";
-
-    new_p1 = Player(&player_one);
-    new_p2 = Player(&player_two);
-    playing = (current_turn == 0) ? new_p1 : new_p2;
-    // can you buy a victory point?
-    if (playing.resource_cards[0] >= 1 && playing.resource_cards[2] >= 1 && playing.resource_cards[3] >= 1) {
-            playing.resource_cards[0] -= 1;
-            playing.resource_cards[2] -= 1;
-            playing.resource_cards[3] -= 1;
-            playing.card_count -= 3;
-            
-            // "buy" the dev card
-            playing.victory_points += 1;
-            if (move_robber) {
-                for(auto& pos: new_robber_hexes) all_moves.push_back(new GameState(new_p1, new_p2, pos, next_turn, turn_number+1));
-            }else {
-                all_moves.push_back(new GameState(new_p1, new_p2, robber_position, next_turn, turn_number+1));
-            }
-            playing.resource_cards[0] += 1;
-            playing.resource_cards[2] += 1;
-            playing.resource_cards[3] += 1;
-            playing.card_count += 3;
-    }
-
-    // std::cout << " got all the card moves. All done!" << std::endl;
 
     return all_moves;
 }
